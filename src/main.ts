@@ -39,6 +39,8 @@ enum Stance {
 let player1 = new Player(w4.GAMEPAD1, 0x42, 90, 80, 0, 0, Facing.Left, Stance.Mid, 100, 0, 0);
 let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0);
 
+let players = [player1, player2];
+
 function updatePlayer(player: Player): void {
     const gamepad = load<u8>(player.gamepad);
     player.vx = 0;
@@ -101,10 +103,10 @@ export function update(): void {
             w4.blit(sprite, x, y, spriteFlags, x, y);
         }
  
-        updatePlayer(player1);
-        updatePlayer(player2);
-        drawPlayer(player1);
-        drawPlayer(player2);
+        for (let i = 0; i < players.length; i++) {
+            updatePlayer(players[i]);
+            drawPlayer(players[i]);
+        }
     } else {
         store<u16>(w4.DRAW_COLORS, 0x23);
         w4.text("Press X to start", 16, 90);
