@@ -6,7 +6,6 @@ const spriteHeight = 8;
 const spriteFlags = 1; // BLIT_2BPP
 const sprite = memory.data<u8>([0xa5, 0x6a, 0xa4, 0x2a, 0xa5, 0x68, 0x55, 0xa2, 0xa5, 0x4a, 0xa5, 0xaa, 0x9a, 0x6a, 0x6a, 0x6a]);
 
-let t = 0;
 let started = true; // for development, start game immediately
 
 class Player {
@@ -36,8 +35,6 @@ enum Stance {
     Mid = 0,
     Low = 1,
 }
-
-
 
 let player1 = new Player(w4.GAMEPAD1, 0x42, 90, 80, 0, 0, Facing.Left, Stance.Mid, 100, 0, 0);
 let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0);
@@ -92,20 +89,17 @@ export function update(): void {
     if (gamepad & w4.BUTTON_1) {
         if (!started) {
             started = true;
-            t = 0;
         }
         store<u16>(w4.DRAW_COLORS, 3);
     }
 
     if (started) {
-        t += 1;
         for (let i = 0; i < 100; i++) {
             const x = 64 + i32(Math.sin(f32(i) / 10) * 64);
             const y = 100 + i32(Math.cos(f32(i) / 10) * 6);
             store<u16>(w4.DRAW_COLORS, 0x23);
             w4.blit(sprite, x, y, spriteFlags, x, y);
         }
-        // w4.blit(sprite, spriteWidth, spriteHeight, spriteFlags, x, y);
  
         updatePlayer(player1);
         updatePlayer(player2);
@@ -115,7 +109,4 @@ export function update(): void {
         store<u16>(w4.DRAW_COLORS, 0x23);
         w4.text("Press X to start", 16, 90);
     }
-
-    t++;
-    // w4.blit(sprite, 36, 76, spriteWidth, spriteHeight, spriteFlags);
 }
