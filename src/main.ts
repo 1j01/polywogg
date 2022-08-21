@@ -17,6 +17,16 @@ const spriteFlags = 1; // BLIT_2BPP
 const sprite = memory.data<u8>([ 0xa5,0x6a,0xa4,0x2a,0xa5,0x68,0x55,0xa2,0xa5,0x4a,0xa5,0xaa,0x9a,0x6a,0x6a,0x6a ]);
 
 let t = 0;
+
+export function start(): void {
+    // palette by Polyphrog - appropriate for a game called "Polywogg"
+    // https://lospec.com/palette-list/black-tar
+    store<u32>(w4.PALETTE, 0x843c35, 0 * sizeof<u32>());
+    store<u32>(w4.PALETTE, 0xffeb94, 1 * sizeof<u32>());
+    store<u32>(w4.PALETTE, 0x398a75, 2 * sizeof<u32>());
+    store<u32>(w4.PALETTE, 0x26153a, 3 * sizeof<u32>());
+}
+
 export function update (): void {
     store<u16>(w4.DRAW_COLORS, 2);
     w4.text("Hello from\nAssemblyScript!", 10, 10);
