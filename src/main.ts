@@ -12,6 +12,7 @@ let started = true; // for development, start game immediately
 class Player {
     constructor(
         public gamepad: usize,
+        public drawColors: usize,
         public x: i32,
         public y: i32,
         public vx: i32,
@@ -38,8 +39,8 @@ enum Stance {
 
 
 
-let player1 = new Player(w4.GAMEPAD1, 80, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0);
-let player2 = new Player(w4.GAMEPAD2, 80, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0);
+let player1 = new Player(w4.GAMEPAD1, 0x42, 90, 80, 0, 0, Facing.Left, Stance.Mid, 100, 0, 0);
+let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0);
 
 function updatePlayer(player: Player): void {
     const gamepad = load<u8>(player.gamepad);
@@ -65,6 +66,7 @@ function updatePlayer(player: Player): void {
 }
 
 function drawPlayer(player: Player): void {
+    store<u16>(w4.DRAW_COLORS, player.drawColors);
     w4.blit(sprite, player.x, player.y, spriteWidth, spriteHeight, spriteFlags  | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0)));
 }
 
@@ -97,16 +99,20 @@ export function update(): void {
 
     if (started) {
         t += 1;
-        const x = 64 + i32(Math.sin(f32(t) / 10) * 64);
-        const y = 64 + i32(Math.cos(f32(t) / 10) * 64);
+        for (let i = 0; i < 100; i++) {
+            const x = 64 + i32(Math.sin(f32(i) / 10) * 64);
+            const y = 100 + i32(Math.cos(f32(i) / 10) * 6);
+            store<u16>(w4.DRAW_COLORS, 0x23);
+            w4.blit(sprite, x, y, spriteFlags, x, y);
+        }
         // w4.blit(sprite, spriteWidth, spriteHeight, spriteFlags, x, y);
-        store<u16>(w4.DRAW_COLORS, 0x42);
-        w4.blit(sprite, x, y, spriteFlags, x, y);
+ 
         updatePlayer(player1);
         updatePlayer(player2);
         drawPlayer(player1);
         drawPlayer(player2);
     } else {
+        store<u16>(w4.DRAW_COLORS, 0x23);
         w4.text("Press X to start", 16, 90);
     }
 
