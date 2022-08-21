@@ -7,8 +7,7 @@ const spriteFlags = 1; // BLIT_2BPP
 const sprite = memory.data<u8>([0xa5, 0x6a, 0xa4, 0x2a, 0xa5, 0x68, 0x55, 0xa2, 0xa5, 0x4a, 0xa5, 0xaa, 0x9a, 0x6a, 0x6a, 0x6a]);
 
 let t = 0;
-let started = false;
-
+let started = true; // for development, start game immediately
 
 class Player {
     constructor(
@@ -17,21 +16,41 @@ class Player {
         public y: i32,
         public vx: i32,
         public vy: i32,
+        public facing: Facing,
+        public stance: Stance,
         public health: i32,
+        public lungeTimer: i32,
+        public stunTimer: i32,
     ) {
     }
 }
 
-let player = new Player(w4.GAMEPAD1, 80, 80, 0, 0, 100);
+enum Facing {
+    Left = -1,
+    Right = 1,
+}
 
-function updatePlayer(): void {
-    const gamepad = load<u8>(w4.GAMEPAD1);
+enum Stance {
+    High = -1,
+    Mid = 0,
+    Low = 1,
+}
+
+
+
+let player1 = new Player(w4.GAMEPAD1, 80, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0);
+let player2 = new Player(w4.GAMEPAD2, 80, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0);
+
+function updatePlayer(player: Player): void {
+    const gamepad = load<u8>(player.gamepad);
     player.vx = 0;
     if (gamepad & w4.BUTTON_LEFT) {
         player.vx -= 1;
+        player.facing = Facing.Left;
     }
     if (gamepad & w4.BUTTON_RIGHT) {
         player.vx += 1;
+        player.facing = Facing.Right;
     }
     player.vy = 0;
     if (gamepad & w4.BUTTON_UP) {
@@ -45,8 +64,8 @@ function updatePlayer(): void {
     player.y += player.vy;
 }
 
-function drawPlayer(): void {
-    w4.blit(sprite, player.x, player.y, spriteWidth, spriteHeight, spriteFlags);
+function drawPlayer(player: Player): void {
+    w4.blit(sprite, player.x, player.y, spriteWidth, spriteHeight, spriteFlags  | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0)));
 }
 
 export function start(): void {
@@ -83,8 +102,10 @@ export function update(): void {
         // w4.blit(sprite, spriteWidth, spriteHeight, spriteFlags, x, y);
         store<u16>(w4.DRAW_COLORS, 0x42);
         w4.blit(sprite, x, y, spriteFlags, x, y);
-        updatePlayer();
-        drawPlayer();
+        updatePlayer(player1);
+        updatePlayer(player2);
+        drawPlayer(player1);
+        drawPlayer(player2);
     } else {
         w4.text("Press X to start", 16, 90);
     }
