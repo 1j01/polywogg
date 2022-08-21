@@ -5,7 +5,7 @@ import {
     spriteHeight,
     spriteFlags,
     sprite,
-} from "../png2src/sprite";
+} from "../png2src-generated/sprite";
 
 let started = true; // for development, start game immediately
 

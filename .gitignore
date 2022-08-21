@@ -1,5 +1,5 @@
 build/
-png2src/
+png2src-generated/
 
 # Logs
 logs
