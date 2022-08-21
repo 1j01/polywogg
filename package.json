@@ -2,10 +2,11 @@
   "name": "polywogg",
   "version": "0.0.0",
   "scripts": {
-    "build": "asc --target release",
-    "build:debug": "asc --target debug",
+    "build": "npm run --silent png2src && asc --target release",
+    "build:debug": "npm run --silent png2src && asc --target debug",
     "start": "w4 watch",
-    "native": "w4 run-native build/cart.wasm"
+    "native": "w4 run-native build/cart.wasm",
+    "png2src": "bash -c 'for f in src/png/*.png; do w4 png2src --assemblyscript $f | sed \"s/const/export const/g\" > png2src/$(basename $f .png).ts; done'"
   },
   "devDependencies": {
     "assemblyscript": "^0.20.14",

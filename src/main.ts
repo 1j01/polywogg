@@ -1,10 +1,11 @@
 import * as w4 from "./wasm4";
 
-// sprite
-const spriteWidth = 8;
-const spriteHeight = 8;
-const spriteFlags = 1; // BLIT_2BPP
-const sprite = memory.data<u8>([0xa5, 0x6a, 0xa4, 0x2a, 0xa5, 0x68, 0x55, 0xa2, 0xa5, 0x4a, 0xa5, 0xaa, 0x9a, 0x6a, 0x6a, 0x6a]);
+import {
+    spriteWidth,
+    spriteHeight,
+    spriteFlags,
+    sprite,
+} from "../png2src/sprite";
 
 let started = true; // for development, start game immediately
 
