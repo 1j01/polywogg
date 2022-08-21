@@ -14,8 +14,8 @@ class Player {
         public drawColors: usize,
         public x: i32,
         public y: i32,
-        public vx: i32,
-        public vy: i32,
+        public vx: f32,
+        public vy: f32,
         public facing: Facing,
         public stance: Stance,
         public health: i32,
@@ -41,8 +41,15 @@ let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, 0, 0, Facing.Right, Stance.M
 
 let players = [player1, player2];
 
+const groundLevel = 87;
+
+function onGround(player: Player): bool {
+    return player.y >= groundLevel;
+}
+
 function updatePlayer(player: Player): void {
     const gamepad = load<u8>(player.gamepad);
+    const grounded = onGround(player);
     player.vx = 0;
     if (gamepad & w4.BUTTON_LEFT) {
         player.vx -= 1;
@@ -52,16 +59,26 @@ function updatePlayer(player: Player): void {
         player.vx += 1;
         player.facing = Facing.Right;
     }
-    player.vy = 0;
-    if (gamepad & w4.BUTTON_UP) {
-        player.vy -= 1;
-    }
-    if (gamepad & w4.BUTTON_DOWN) {
-        player.vy += 1;
+    if (grounded) {
+        if (gamepad & w4.BUTTON_1) {
+            player.vy = -3;
+        }
+        if (gamepad & w4.BUTTON_UP) {
+            player.stance = Stance.High;
+        } else if (gamepad & w4.BUTTON_DOWN) {
+            player.stance = Stance.Low;
+        } else {
+            player.stance = Stance.Mid;
+        }
+    }else{
+        player.vy += 0.2;
     }
 
-    player.x += player.vx;
-    player.y += player.vy;
+    player.x += player.vx as i32;
+    player.y += player.vy as i32;
+    if (player.y > groundLevel) {
+        player.y = groundLevel;
+    }
 }
 
 function drawPlayer(player: Player): void {
