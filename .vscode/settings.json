@@ -1,8 +1,12 @@
 {
 	"cSpell.words": [
 		"assemblyscript",
+		"libscanmem",
+		"pgrep",
+		"pids",
 		"Polyphrog",
 		"polywogg",
-		"quickstart"
+		"quickstart",
+		"scanmem"
 	]
 }

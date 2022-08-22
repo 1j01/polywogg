@@ -7,7 +7,12 @@ import Sprite from '../../src/sprite';
 const {{name}}Width = {{width}};
 const {{name}}Height = {{height}};
 const {{name}}Flags = {{flags}}; // {{flagsHumanReadable}}
+// Crazy hack to edit the sprite data in memory
+// using an external image editor, by scanning for
+// a magic sentinel value with scanmem
+const {{name}}StartSentinel = memory.data<u8>([ START_SENTINEL_BYTES ]);
 const {{name}} = memory.data<u8>([ {{bytes}} ]);
+const {{name}}EndSentinel = memory.data<u8>([ END_SENTINEL_BYTES ]);
 
 export const {{name}}Sprite = new Sprite({{name}}, {{name}}Width, {{name}}Height, {{name}}Flags);
 {{/sprites}}
