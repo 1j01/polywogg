@@ -3,6 +3,7 @@ import * as w4 from "./wasm4";
 import { spriteSprite } from "../build/png2src-generated/sprite";
 import { spriteLowSprite } from "../build/png2src-generated/spriteLow";
 
+let t = 0;
 let started = true; // for development, start game immediately
 
 class Player {
@@ -80,7 +81,7 @@ function updatePlayer(player: Player): void {
 
 function drawPlayer(player: Player): void {
     store<u16>(w4.DRAW_COLORS, player.drawColors);
-    const sprite = player.stance == Stance.Low ? spriteLowSprite : spriteSprite;
+    const sprite = t % 20 < 10 ? spriteLowSprite : spriteSprite;
     const x = player.x - (sprite.width / 2);
     const y = player.y - sprite.height;
     const flags = sprite.flags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0));
@@ -131,6 +132,8 @@ export function update(): void {
             updatePlayer(players[i]);
             drawPlayer(players[i]);
         }
+
+        t++;
     } else {
         store<u16>(w4.DRAW_COLORS, 0x23);
         w4.text("Press X to start", 16, 90);
