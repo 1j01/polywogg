@@ -8,6 +8,8 @@ FOLDER=build/png2src-generated
 mkdir -p $FOLDER
 rm $FOLDER/*
 
+INFO_FILE=$FOLDER/png2mem.ini
+
 for f in src/png/*.png
 do
 	# Had to use piping since --output option didn't work for me.
@@ -31,7 +33,7 @@ do
 	END_SENTINEL_BYTES_SCANMEM=$(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g' | sed 's/^ //g' | sed 's/ $//g')
 	echo "Start sentinel for scanmem: $START_SENTINEL_BYTES_SCANMEM"
 	echo "End sentinel for scanmem:   $END_SENTINEL_BYTES_SCANMEM"
-	INFO_FILE=$FOLDER/$(basename $f .png).ini
+	echo "[$f]" >>$INFO_FILE
 	echo "START_SENTINEL_BYTES=$START_SENTINEL_BYTES" >>$INFO_FILE
 	echo "END_SENTINEL_BYTES=$END_SENTINEL_BYTES" >>$INFO_FILE
 	echo "START_SENTINEL_BYTES_SCANMEM=$START_SENTINEL_BYTES_SCANMEM" >>$INFO_FILE
