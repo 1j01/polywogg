@@ -19,8 +19,15 @@ do
 	# I'm also doing this in order to allow for scanmem, which is pretty crazy.
 	START_SENTINEL_BYTES=$(echo -n "MEM_START_SENTINEL" "$f" | xxd -i | tr -d '\r\n')
 	END_SENTINEL_BYTES=$(echo -n "MEM_START_SENTINEL" "$f" | xxd -i | tr -d '\r\n')
-	# echo "START_SENTINEL_BYTES: $START_SENTINEL_BYTES"
-	# echo "END_SENTINEL_BYTES: $END_SENTINEL_BYTES"
+	# WHY does this not work??? sed can't do a |??
+	# echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/0x|,//g')"
+	# echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/(0x|,)//g')"
+	# Also can't do \s+??? what is going on here?
+	# echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
+	# echo "End sentinel for scanmem: $(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
+	echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g')"
+	echo "End sentinel for scanmem:   $(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g')"
+
 	w4 png2src \
 		--assemblyscript $f \
 		--template src/png2src-template.ts.mustache \
