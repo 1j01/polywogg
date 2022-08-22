@@ -5,7 +5,14 @@ import {
     spriteHeight,
     spriteFlags,
     sprite,
-} from "../png2src-generated/sprite";
+} from "../build/png2src-generated/sprite";
+
+import {
+    spriteLowWidth,
+    spriteLowHeight,
+    spriteLowFlags,
+    spriteLow,
+} from "../build/png2src-generated/spriteLow";
 
 let started = true; // for development, start game immediately
 
@@ -84,7 +91,11 @@ function updatePlayer(player: Player): void {
 
 function drawPlayer(player: Player): void {
     store<u16>(w4.DRAW_COLORS, player.drawColors);
-    w4.blit(sprite, player.x-spriteWidth/2, player.y, spriteWidth, spriteHeight, spriteFlags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0)));
+    if (player.stance == Stance.Low) {
+        w4.blit(spriteLow, player.x - spriteLowWidth / 2, player.y, spriteLowWidth, spriteLowHeight, spriteLowFlags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0)));
+    } else {
+        w4.blit(sprite, player.x - spriteWidth / 2, player.y, spriteWidth, spriteHeight, spriteFlags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0)));
+    }
     // draw sword
     const swordX = player.x + (player.facing == Facing.Left ? -2 : 1);
     const swordY = player.y + 4 + (player.stance as i32);
