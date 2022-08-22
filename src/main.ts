@@ -119,7 +119,7 @@ export function update(): void {
     store<u16>(w4.DRAW_COLORS, 2);
     w4.text("Welcome to\n\n    Polywogg!", 10, 10);
 
-    w4.text(sentinelPtr.toString(), 0, 0);
+    // w4.text(sentinelPtr.toString(), 0, 0);
 
     const gamepad = load<u8>(w4.GAMEPAD1);
     if (gamepad & w4.BUTTON_1) {
