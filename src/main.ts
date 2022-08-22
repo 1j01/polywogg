@@ -68,7 +68,7 @@ function updatePlayer(player: Player): void {
         } else {
             player.stance = Stance.Mid;
         }
-    }else{
+    } else {
         player.vy += 0.2;
     }
 
@@ -86,7 +86,7 @@ function drawPlayer(player: Player): void {
     const y = player.y - sprite.height;
     const flags = sprite.flags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0));
     w4.blit(sprite.data, x, y, sprite.width, sprite.height, flags);
-    
+
     // draw sword
     const swordX = player.x + (player.facing == Facing.Left ? -2 : 1);
     const swordY = player.y - 4 + (player.stance as i32);
@@ -127,7 +127,7 @@ export function update(): void {
             store<u16>(w4.DRAW_COLORS, 0x23);
             w4.blit(playerMidSprite.data, x, y, w4.BLIT_2BPP, x, y);
         }
- 
+
         for (let i = 0; i < players.length; i++) {
             updatePlayer(players[i]);
             drawPlayer(players[i]);
