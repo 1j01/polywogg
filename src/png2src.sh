@@ -8,17 +8,16 @@ FOLDER=build/png2src-generated
 mkdir -p $FOLDER
 rm $FOLDER/*
 
-INFO_FILE=$FOLDER/png2mem.ini
+INI_FILE=$FOLDER/png2mem.ini
 
 for f in src/png/*.png
 do
-	# Had to use piping since --output option didn't work for me.
-
 	# Alright, I'm doing something crazy here:
 	# I'm using `w4 png2src`'s built-in mustache template support
 	# but then also modifying the output with `sed` here.
 	# So it's like a double templated file.
-	# I'm also doing this in order to allow for scanmem, which is pretty crazy.
+	# I'm also doing this in order to allow hotswapping image data using `scanmem`, which is pretty crazy.
+	# (See png2mem.py)
 	START_SENTINEL_BYTES=$(echo -n "MEM_START_SENTINEL" "$f" | xxd -i | tr -d '\r\n')
 	END_SENTINEL_BYTES=$(echo -n "MEM_END_SENTINEL" "$f" | xxd -i | tr -d '\r\n')
 	# WHY does this not work??? sed can't do a |??
@@ -28,23 +27,21 @@ do
 	# This is probably some escaping problem, because this is bash.
 	# echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
 	# echo "End sentinel for scanmem: $(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
-	echo "To edit $f:"
 	START_SENTINEL_BYTES_SCANMEM=$(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g' | sed 's/^ //g' | sed 's/ $//g')
 	END_SENTINEL_BYTES_SCANMEM=$(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g' | sed 's/^ //g' | sed 's/ $//g')
 	echo "Start sentinel for scanmem: $START_SENTINEL_BYTES_SCANMEM"
 	echo "End sentinel for scanmem:   $END_SENTINEL_BYTES_SCANMEM"
-	echo "[$f]" >>$INFO_FILE
-	echo "START_SENTINEL_BYTES=$START_SENTINEL_BYTES" >>$INFO_FILE
-	echo "END_SENTINEL_BYTES=$END_SENTINEL_BYTES" >>$INFO_FILE
-	echo "START_SENTINEL_BYTES_SCANMEM=$START_SENTINEL_BYTES_SCANMEM" >>$INFO_FILE
-	echo "END_SENTINEL_BYTES_SCANMEM=$END_SENTINEL_BYTES_SCANMEM" >>$INFO_FILE
-	
-	echo "sudo scanmem --pid=\$(pgrep wasm4-linux) --command 'option scan_data_type bytearray;reset;$START_SENTINEL_BYTES_SCANMEM;list'"
-	echo "sudo scanmem --pid=\$(pgrep wasm4-linux) --command 'option scan_data_type bytearray;reset;$END_SENTINEL_BYTES_SCANMEM;list'"
 
+	echo "[$f]" >>$INI_FILE
+	echo "START_SENTINEL_BYTES=$START_SENTINEL_BYTES" >>$INI_FILE
+	echo "END_SENTINEL_BYTES=$END_SENTINEL_BYTES" >>$INI_FILE
+	echo "START_SENTINEL_BYTES_SCANMEM=$START_SENTINEL_BYTES_SCANMEM" >>$INI_FILE
+	echo "END_SENTINEL_BYTES_SCANMEM=$END_SENTINEL_BYTES_SCANMEM" >>$INI_FILE
+
+	# Had to pipe to a file since the --output option didn't work for me.
 	w4 png2src \
-		--assemblyscript $f \
 		--template src/png2src-template.ts.mustache \
+		$f \
 		| sed "s/START_SENTINEL_BYTES/$START_SENTINEL_BYTES/g" \
 		| sed "s/END_SENTINEL_BYTES/$END_SENTINEL_BYTES/g" \
 		> $FOLDER/$(basename $f .png).ts
