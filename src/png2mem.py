@@ -21,7 +21,13 @@ config.read('build/png2src-generated/png2mem.ini')
 
 from subprocess import Popen, PIPE, STDOUT, run
 
-target_pid = run(['pgrep', 'wasm4-linux'], capture_output=True).stdout.splitlines()[0]
+target_p_name = 'wasm4-linux'
+matching_pids = run(['pgrep', target_p_name], capture_output=True).stdout.decode().splitlines()
+if len(matching_pids) == 0:
+	print("Target process %s not found!" % target_p_name)
+	exit(1)
+
+target_pid = matching_pids[0]
 
 p = Popen(['scanmem', '--pid', target_pid], stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
@@ -73,4 +79,18 @@ for match in matches:
 
 print("starts:", starts)
 print("ends:", ends)
+
+w4_paths = run(["which", "w4"], capture_output=True).stdout.decode().splitlines()
+print("w4 program path(s): ", w4_paths)
+if len(w4_paths) == 0:
+	print("w4 not found in PATH! Exiting.")
+	exit(1)
+
+# get new bytes to splice in
+image_data_str = run([w4, "png2src", "--template", "src/png2src-template.txt.mustache", target_file], capture_output=True).stdout.decode()
+# "0x00, 0xFF" -> "00 FF"
+image_data_bytes_scanmem = re.findall(r"0x([0-9a-fA-F]{2})")
+print(image_data_bytes_scanmem)
+print(image_data_bytes_scanmem.zip())
+
 
