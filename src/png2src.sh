@@ -25,8 +25,11 @@ do
 	# Also can't do \s+??? what is going on here?
 	# echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
 	# echo "End sentinel for scanmem: $(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
-	echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g')"
-	echo "End sentinel for scanmem:   $(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g')"
+	echo "To edit $f:"
+	START_SENTINEL_BYTES_SCANMEM=$(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g')
+	END_SENTINEL_BYTES_SCANMEM=$(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g')
+	echo "Start sentinel for scanmem: $START_SENTINEL_BYTES_SCANMEM"
+	echo "End sentinel for scanmem:   $END_SENTINEL_BYTES_SCANMEM"
 
 	w4 png2src \
 		--assemblyscript $f \
