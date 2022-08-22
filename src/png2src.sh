@@ -31,8 +31,8 @@ do
 	echo "Start sentinel for scanmem: $START_SENTINEL_BYTES_SCANMEM"
 	echo "End sentinel for scanmem:   $END_SENTINEL_BYTES_SCANMEM"
 
-	echo "sudo scanmem --pid=\$(pgrep wasm4-linux) --command 'option scan_data_type bytearray;$START_SENTINEL_BYTES_SCANMEM;list'"
-	echo "sudo scanmem --pid=\$(pgrep wasm4-linux) --command 'option scan_data_type bytearray;$END_SENTINEL_BYTES_SCANMEM;list'"
+	echo "sudo scanmem --pid=\$(pgrep wasm4-linux) --command 'option scan_data_type bytearray;reset;$START_SENTINEL_BYTES_SCANMEM;list'"
+	echo "sudo scanmem --pid=\$(pgrep wasm4-linux) --command 'option scan_data_type bytearray;reset;$END_SENTINEL_BYTES_SCANMEM;list'"
 
 	w4 png2src \
 		--assemblyscript $f \
