@@ -3,6 +3,7 @@
 		"assemblyscript",
 		"Polyphrog",
 		"polywogg",
-		"quickstart"
+		"quickstart",
+		"scanmem"
 	]
 }

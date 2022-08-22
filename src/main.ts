@@ -108,9 +108,18 @@ export function start(): void {
     // store<u32>(w4.PALETTE, 0xf29d2c, 3 * sizeof<u32>());
 }
 
+// generated with:
+// crypto.getRandomValues(new Uint8Array(50))
+const bytes: u8[] = [125, 211, 170, 124, 166, 94, 187, 132, 162, 226, 197, 108, 208, 157, 113, 240, 202, 37, 74, 143, 93, 33, 129, 113, 30, 37, 205, 183, 97, 244, 39, 98, 30, 240, 195, 152, 19, 48, 167, 155, 85, 238, 105, 121, 54, 105, 31, 82, 0, 89];
+// scanmem with:
+// [125,211,170,124,166,94,187,132,162,226,197,108,208,157,113,240,202,37,74,143,93,33,129,113,30,37,205,183,97,244,39,98,30,240,195,152,19,48,167,155,85,238,105,121,54,105,31,82,0,89]
+// .map((n) => n.toString(16).padStart("0", 2)).join(" ").toUpperCase()
+
 export function update(): void {
     store<u16>(w4.DRAW_COLORS, 2);
     w4.text("Welcome to\n\n    Polywogg!", 10, 10);
+
+    w4.text(bytes.toString(), 0, 0);
 
     const gamepad = load<u8>(w4.GAMEPAD1);
     if (gamepad & w4.BUTTON_1) {
