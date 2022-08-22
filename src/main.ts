@@ -108,9 +108,20 @@ export function start(): void {
     // store<u32>(w4.PALETTE, 0xf29d2c, 3 * sizeof<u32>());
 }
 
+function outlinedText(text: string, x: i32, y: i32): void {
+    store<u16>(w4.DRAW_COLORS, 0x4);
+    w4.text(text, x - 1, y);
+    w4.text(text, x + 1, y);
+    w4.text(text, x, y - 1);
+    w4.text(text, x, y + 1);
+    w4.text(text, x + 1, y + 1); // shadow
+    store<u16>(w4.DRAW_COLORS, 0x2);
+    w4.text(text, x, y);
+}
+
 export function update(): void {
-    store<u16>(w4.DRAW_COLORS, 2);
-    w4.text("Welcome to\n\n    Polywogg!", 10, 10);
+
+    outlinedText("Welcome to\n\n    Polywogg!", 10, 10);
 
     const gamepad = load<u8>(w4.GAMEPAD1);
     if (gamepad & w4.BUTTON_1) {
