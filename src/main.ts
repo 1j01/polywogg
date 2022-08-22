@@ -1,18 +1,7 @@
 import * as w4 from "./wasm4";
 
-import {
-    spriteWidth,
-    spriteHeight,
-    spriteFlags,
-    sprite,
-} from "../build/png2src-generated/sprite";
-
-import {
-    spriteLowWidth,
-    spriteLowHeight,
-    spriteLowFlags,
-    spriteLow,
-} from "../build/png2src-generated/spriteLow";
+import { spriteSprite } from "../build/png2src-generated/sprite";
+import { spriteLowSprite } from "../build/png2src-generated/spriteLow";
 
 let started = true; // for development, start game immediately
 
@@ -49,7 +38,7 @@ let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, 0, 0, Facing.Right, Stance.M
 
 let players = [player1, player2];
 
-const groundLevel = 87;
+const groundLevel = 95;
 
 function onGround(player: Player): bool {
     return player.y >= groundLevel;
@@ -91,14 +80,15 @@ function updatePlayer(player: Player): void {
 
 function drawPlayer(player: Player): void {
     store<u16>(w4.DRAW_COLORS, player.drawColors);
-    if (player.stance == Stance.Low) {
-        w4.blit(spriteLow, player.x - spriteLowWidth / 2, player.y, spriteLowWidth, spriteLowHeight, spriteLowFlags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0)));
-    } else {
-        w4.blit(sprite, player.x - spriteWidth / 2, player.y, spriteWidth, spriteHeight, spriteFlags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0)));
-    }
+    const sprite = player.stance == Stance.Low ? spriteLowSprite : spriteSprite;
+    const x = player.x - (sprite.width / 2);
+    const y = player.y - sprite.height;
+    const flags = sprite.flags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0));
+    w4.blit(sprite.data, x, y, sprite.width, sprite.height, flags);
+    
     // draw sword
     const swordX = player.x + (player.facing == Facing.Left ? -2 : 1);
-    const swordY = player.y + 4 + (player.stance as i32);
+    const swordY = player.y - 4 + (player.stance as i32);
 
     w4.line(swordX, swordY, swordX + (player.facing as i32) * 4, swordY + (player.stance as i32) * 3);
 }
@@ -134,7 +124,7 @@ export function update(): void {
             const x = 64 + i32(Math.sin(f32(i) / 10) * 64);
             const y = 100 + i32(Math.cos(f32(i) / 10) * 6);
             store<u16>(w4.DRAW_COLORS, 0x23);
-            w4.blit(sprite, x, y, spriteFlags, x, y);
+            w4.blit(spriteSprite.data, x, y, w4.BLIT_2BPP, x, y);
         }
  
         for (let i = 0; i < players.length; i++) {

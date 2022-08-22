@@ -1,0 +1,13 @@
+{{! don't believe the next comment, this isn't a generated file. }}
+// @generated file - do not edit
+{{! import path is relative to build/png2src-generated }}
+import Sprite from '../../src/sprite';
+
+{{#sprites}}
+const {{name}}Width = {{width}};
+const {{name}}Height = {{height}};
+const {{name}}Flags = {{flags}}; // {{flagsHumanReadable}}
+const {{name}} = memory.data<u8>([ {{bytes}} ]);
+
+export const {{name}}Sprite = new Sprite({{name}}, {{name}}Width, {{name}}Height, {{name}}Flags);
+{{/sprites}}

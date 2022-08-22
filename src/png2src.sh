@@ -11,6 +11,5 @@ rm $FOLDER/*
 for f in src/png/*.png
 do
 	# Had to use piping since --output option didn't work for me.
-	# Could use a --template instead of sed replacement.
-	w4 png2src --assemblyscript $f | sed 's/const/export const/g' > $FOLDER/$(basename $f .png).ts
+	w4 png2src --assemblyscript $f --template src/png2src-template.ts.mustache > $FOLDER/$(basename $f .png).ts
 done
