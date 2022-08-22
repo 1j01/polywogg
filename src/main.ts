@@ -1,7 +1,8 @@
 import * as w4 from "./wasm4";
 
-import { spriteSprite } from "../build/png2src-generated/sprite";
-import { spriteLowSprite } from "../build/png2src-generated/spriteLow";
+import { playerMidSprite } from "../build/png2src-generated/playerMid";
+// import { playerHighSprite } from "../build/png2src-generated/playerHigh";
+import { playerLowSprite } from "../build/png2src-generated/playerLow";
 
 let started = true; // for development, start game immediately
 
@@ -80,7 +81,7 @@ function updatePlayer(player: Player): void {
 
 function drawPlayer(player: Player): void {
     store<u16>(w4.DRAW_COLORS, player.drawColors);
-    const sprite = player.stance == Stance.Low ? spriteLowSprite : spriteSprite;
+    const sprite = player.stance == Stance.Low ? playerLowSprite : playerMidSprite;
     const x = player.x - (sprite.width / 2);
     const y = player.y - sprite.height;
     const flags = sprite.flags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0));
@@ -124,7 +125,7 @@ export function update(): void {
             const x = 64 + i32(Math.sin(f32(i) / 10) * 64);
             const y = 100 + i32(Math.cos(f32(i) / 10) * 6);
             store<u16>(w4.DRAW_COLORS, 0x23);
-            w4.blit(spriteSprite.data, x, y, w4.BLIT_2BPP, x, y);
+            w4.blit(playerMidSprite.data, x, y, w4.BLIT_2BPP, x, y);
         }
  
         for (let i = 0; i < players.length; i++) {
