@@ -10,9 +10,9 @@
 
 import getpass
 if getpass.getuser() != "root":
-	# print("This script must be run as root. Use `sudo python3 png2mem.py`")
+	# print("This script must be run as root. Use `sudo -E python3 png2mem.py`")
 	# exit(1)
-	print("This script should be run as root, using `sudo python3 png2mem.py`")
+	print("This script should be run as root, using `sudo -E python3 png2mem.py`")
 	print("Continuing on, in case it works anyways...")
 
 import configparser
@@ -83,7 +83,10 @@ print("ends:", ends)
 w4_paths = run(["which", "w4"], capture_output=True).stdout.decode().splitlines()
 print("w4 program path(s): ", w4_paths)
 if len(w4_paths) == 0:
-	print("w4 not found in PATH! Exiting.")
+	print("w4 not found in PATH!")
+	import os
+	print("PATH: ", os.environ["PATH"])
+	print("This script must be run with sudo -E flag to preserve the environment variables.")
 	exit(1)
 
 # get new bytes to splice in
