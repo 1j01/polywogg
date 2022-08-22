@@ -6,8 +6,7 @@
     "build:debug": "npm run --silent png2src && asc --target debug",
     "start": "w4 watch",
     "native": "w4 run-native build/cart.wasm",
-    "png2src @NOTE": "# Could use a --template instead of sed replacement. Also, probably worth pulling this out into a script. Also, I'm not 100% sure bash is needed specifically. Also --output option didn't work for me.",
-    "png2src": "bash -c 'rm png2src-generated/*; for f in src/png/*.png; do w4 png2src --assemblyscript $f | sed \"s/const/export const/g\" > png2src-generated/$(basename $f .png).ts; done'"
+    "png2src": "bash src/png2src.sh"
   },
   "devDependencies": {
     "assemblyscript": "^0.20.14",
