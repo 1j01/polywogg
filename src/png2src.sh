@@ -29,8 +29,8 @@ do
 	# echo "End sentinel for scanmem: $(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
 	START_SENTINEL_BYTES_SCANMEM=$(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g' | sed 's/^ //g' | sed 's/ $//g')
 	END_SENTINEL_BYTES_SCANMEM=$(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g' | sed 's/^ //g' | sed 's/ $//g')
-	echo "Start sentinel for scanmem: $START_SENTINEL_BYTES_SCANMEM"
-	echo "End sentinel for scanmem:   $END_SENTINEL_BYTES_SCANMEM"
+	# echo "Start sentinel for scanmem: $START_SENTINEL_BYTES_SCANMEM"
+	# echo "End sentinel for scanmem:   $END_SENTINEL_BYTES_SCANMEM"
 
 	echo "[$f]" >>$INI_FILE
 	echo "START_SENTINEL_BYTES=$START_SENTINEL_BYTES" >>$INI_FILE

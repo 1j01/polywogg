@@ -140,3 +140,5 @@ stdout_data, stderr_data = p.communicate(input="\n".join(scanmem_commands).encod
 print("stdout:\n    " + "\n    ".join(stdout_data.decode().splitlines()))
 print("stderr:\n    " + "\n    ".join(stderr_data.decode().splitlines()))
 
+# The end!
+print("\nDone.")
