@@ -23,14 +23,20 @@ do
 	# echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/0x|,//g')"
 	# echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/(0x|,)//g')"
 	# Also can't do \s+??? what is going on here?
+	# This is probably some escaping problem, because this is bash.
 	# echo "Start sentinel for scanmem: $(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
 	# echo "End sentinel for scanmem: $(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/\\s+/ /g')"
 	echo "To edit $f:"
-	START_SENTINEL_BYTES_SCANMEM=$(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g')
-	END_SENTINEL_BYTES_SCANMEM=$(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g')
+	START_SENTINEL_BYTES_SCANMEM=$(echo -n "$START_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g' | sed 's/^ //g' | sed 's/ $//g')
+	END_SENTINEL_BYTES_SCANMEM=$(echo -n "$END_SENTINEL_BYTES" | sed 's/0x//g' | sed 's/,//g' | sed 's/  / /g' | sed 's/^ //g' | sed 's/ $//g')
 	echo "Start sentinel for scanmem: $START_SENTINEL_BYTES_SCANMEM"
 	echo "End sentinel for scanmem:   $END_SENTINEL_BYTES_SCANMEM"
-
+	INFO_FILE=$FOLDER/$(basename $f .png).ini
+	echo "START_SENTINEL_BYTES=$START_SENTINEL_BYTES" >>$INFO_FILE
+	echo "END_SENTINEL_BYTES=$END_SENTINEL_BYTES" >>$INFO_FILE
+	echo "START_SENTINEL_BYTES_SCANMEM=$START_SENTINEL_BYTES_SCANMEM" >>$INFO_FILE
+	echo "END_SENTINEL_BYTES_SCANMEM=$END_SENTINEL_BYTES_SCANMEM" >>$INFO_FILE
+	
 	echo "sudo scanmem --pid=\$(pgrep wasm4-linux) --command 'option scan_data_type bytearray;reset;$START_SENTINEL_BYTES_SCANMEM;list'"
 	echo "sudo scanmem --pid=\$(pgrep wasm4-linux) --command 'option scan_data_type bytearray;reset;$END_SENTINEL_BYTES_SCANMEM;list'"
 
