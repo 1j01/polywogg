@@ -48,7 +48,9 @@ function onGround(player: Player): bool {
 function updatePlayer(player: Player): void {
     const gamepad = load<u8>(player.gamepad);
     const grounded = onGround(player);
-    if (player.lungeTimer <= 0) {
+    const stunned = player.stunTimer > 0;
+    const lunging = player.lungeTimer > 0;
+    if (!lunging && !stunned) {
         player.vx = 0;
         if (gamepad & w4.BUTTON_LEFT) {
             player.vx -= 1;
@@ -62,7 +64,7 @@ function updatePlayer(player: Player): void {
         player.vx *= 0.9;
     }
     if (grounded) {
-        if (gamepad & w4.BUTTON_1) {
+        if (gamepad & w4.BUTTON_1 && !stunned) {
             player.vy = -3;
         }
         if (gamepad & w4.BUTTON_UP) {
@@ -77,9 +79,24 @@ function updatePlayer(player: Player): void {
     }
 
     if (gamepad & w4.BUTTON_2) {
-        if (player.lungeTimer <= 0) {
+        if (!lunging && !stunned) {
             player.lungeTimer = 15;
             player.vx = player.facing as f32 * 5;
+        }
+    }
+
+    for (let i = 0; i < players.length; i++) {
+        if (players[i] === player) continue;
+        const otherPlayer = players[i];
+        if (lunging) {
+            if (
+                Math.abs(otherPlayer.x - player.x + player.facing as i32 * 5) < 9 &&
+                otherPlayer.stunTimer <= 0 // TODO: separate invincibility timer
+            ) {
+                otherPlayer.vx += player.facing as f32 * 3;
+                otherPlayer.stunTimer = 10;
+                otherPlayer.health -= 10;
+            }
         }
     }
 
