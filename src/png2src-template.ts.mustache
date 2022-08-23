@@ -7,9 +7,20 @@ import Sprite from '../../src/sprite';
 const {{name}}Width = {{width}};
 const {{name}}Height = {{height}};
 const {{name}}Flags = {{flags}}; // {{flagsHumanReadable}}
-// Crazy hack to edit the sprite data in memory
-// using an external image editor, by scanning for
-// a magic sentinel value with scanmem
+{{! Enable a crazy hack to edit the sprite data in memory
+using an external image editor, by scanning for
+sentinel values in memory and writing to the memory between them,
+using scanmem.
+See png2mem.py
+
+These sentinels must be defined immediately before and after
+the sprite data, but don't need to be actually used by the program.
+(It doesn't seem to "tree shake" them away, which is good in this case.)
+
+Also note that I'm using a special replacement on top of the mustache template,
+for the sentinels. This is done in png2src.py
+(This wouldn't be needed if assemblyscript could cast a string to an array of bytes somehow.)
+}}
 const {{name}}StartSentinel = memory.data<u8>([ START_SENTINEL_BYTES ]);
 const {{name}} = memory.data<u8>([ {{bytes}} ]);
 const {{name}}EndSentinel = memory.data<u8>([ END_SENTINEL_BYTES ]);
