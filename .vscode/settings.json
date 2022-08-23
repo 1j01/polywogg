@@ -1,4 +1,7 @@
 {
+	"editor.formatOnType": true,
+	"editor.formatOnPaste": true,
+	"editor.formatOnSave": true,
 	"cSpell.words": [
 		"assemblyscript",
 		"libscanmem",
