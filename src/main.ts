@@ -157,6 +157,20 @@ function outlinedText(text: string, x: i32, y: i32): void {
     w4.text(text, x, y);
 }
 
+function drawGround(): void {
+    store<u16>(w4.DRAW_COLORS, 0x3);
+    w4.rect(0, groundLevel, 160, 160 - groundLevel)
+    store<u16>(w4.DRAW_COLORS, 0x4);
+    for (let i = 0; i < 80; i++) {
+        const centerX = 80;
+        const centerY = groundLevel + (160 - groundLevel) / 2;
+        const x = centerX + (Math.sin(i * 500) * 80) as i32;
+        const y = centerY + (Math.cos(i * 50) * (160 - groundLevel) / 2) as i32;
+        w4.line(x, y, x + (Math.sin(i * 420) + 0.1) as i32, y + 5 + Math.sin(i * 459) * 2 as i32);
+        w4.line(x + (Math.sin(i * 420) + 0.1) * 5 as i32, y, x + (Math.sin(i * 420) + 0.1) * 5 as i32, y + 5 + Math.sin(i * 459) * 2 as i32);
+    }
+}
+
 export function update(): void {
 
     outlinedText("Welcome to\n\n    Polywogg!", 10, 10);
@@ -170,13 +184,7 @@ export function update(): void {
     }
 
     if (started) {
-        for (let i = 0; i < 100; i++) {
-            const x = 64 + i32(Math.sin(f32(i) / 10) * 64);
-            const y = 100 + i32(Math.cos(f32(i) / 10) * 6);
-            store<u16>(w4.DRAW_COLORS, 0x23);
-            w4.blit(playerMidSprite.data, x, y, w4.BLIT_2BPP, x, y);
-        }
-
+        drawGround();
         for (let i = 0; i < players.length; i++) {
             updatePlayer(players[i]);
             drawPlayer(players[i]);
