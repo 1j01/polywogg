@@ -18,13 +18,15 @@ from subprocess import run, Popen, PIPE, STDOUT
 
 parser = argparse.ArgumentParser(description = "Splice data into memory between a start and end sentinel.")
 
+parser.add_argument("target_file", metavar = "target-file", type = str, help = "png file to hot-swap in memory")
+
 parser.add_argument("--w4", metavar = "path", type = str, help = "path to the WASM-4 binary 'w4'")
 
 args = parser.parse_args()
 
 recommended_cmd = 'sudo env "PATH=$PATH" python3 src/png2mem.py'
 
-if args.w4 and args.w4 != "":
+if args.w4:
     w4 = args.w4
 else:
 	w4_paths = run(["which", "w4"], capture_output=True).stdout.decode().splitlines()
@@ -35,6 +37,7 @@ else:
 		exit(1)
 	w4 = w4_paths[0]
 
+target_file = args.target_file
 
 if getpass.getuser() != "root":
 	# print("This script must be run as root. Use `%s`" % (recommended_cmd,))
@@ -56,8 +59,6 @@ if len(matching_pids) == 0:
 target_pid = matching_pids[0]
 
 p = Popen(['scanmem', '--pid', target_pid], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-
-target_file = "src/png/playerMid.png"
 
 if target_file not in config.sections():
 	print("File '%s' not found in ini file. Sections found: %a" % (target_file, config.sections()))

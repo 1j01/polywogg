@@ -6,10 +6,13 @@
     "build:debug": "npm run --silent png2src && asc --target debug",
     "start": "w4 watch",
     "native": "w4 run-native build/cart.wasm",
-    "png2src": "bash src/png2src.sh"
+    "png2src": "bash src/png2src.sh",
+    "png2mem:watch": "onchange 'src/png/**/*.png' -- npm run --silent png2mem -- {{file}}",
+    "png2mem": "sudo env \"PATH=$PATH\" python3 src/png2mem.py"
   },
   "devDependencies": {
     "assemblyscript": "^0.20.14",
-    "watch": "^1.0.2"
+    "onchange": "^7.1.0",
+    "parallelshell": "^3.0.2"
   }
 }
