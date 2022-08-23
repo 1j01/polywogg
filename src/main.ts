@@ -7,19 +7,19 @@ import { playerLowSprite } from "../build/png2src-generated/playerLow";
 let started = true; // for development, start game immediately
 
 class Player {
+    public stance: Stance;
+    public health: i32 = 100;
+    public lungeTimer: i32;
+    public stunTimer: i32;
+    public prevGamepadState: u8;
+    public vx: f32;
+    public vy: f32;
     constructor(
         public gamepadPtr: usize,
         public drawColors: usize,
         public x: i32,
         public y: i32,
-        public vx: f32,
-        public vy: f32,
         public facing: Facing,
-        public stance: Stance,
-        public health: i32,
-        public lungeTimer: i32,
-        public stunTimer: i32,
-        public prevGamepadState: u8,
     ) {
     }
 }
@@ -35,8 +35,8 @@ enum Stance {
     Low = 1,
 }
 
-let player1 = new Player(w4.GAMEPAD1, 0x42, 90, 80, 0, 0, Facing.Left, Stance.Mid, 100, 0, 0, 0);
-let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0, 0);
+let player1 = new Player(w4.GAMEPAD1, 0x42, 90, 80, Facing.Left);
+let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, Facing.Right);
 
 let players = [player1, player2];
 
