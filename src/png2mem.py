@@ -142,4 +142,4 @@ print("stdout:\n    " + "\n    ".join(stdout_data.decode().splitlines()))
 print("stderr:\n    " + "\n    ".join(stderr_data.decode().splitlines()))
 
 # The end!
-print("\nDone.")
+print("\nDone. Hot-swapped %s" % (target_file,))
