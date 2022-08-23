@@ -6,12 +6,14 @@ import { playerLowSprite } from "../build/png2src-generated/playerLow";
 
 let started = true; // for development, start game immediately
 
+const groundLevel = 95;
+
 class Player {
     public stance: Stance;
     public health: i32 = 100;
     public lungeTimer: i32;
     public stunTimer: i32;
-    public prevGamepadState: u8;
+    public prevGamepadState: u8 = 0xff; // bits set to prevent jumping when starting game
     public vx: f32;
     public vy: f32;
     constructor(
@@ -35,12 +37,12 @@ enum Stance {
     Low = 1,
 }
 
-let player1 = new Player(w4.GAMEPAD1, 0x42, 90, 80, Facing.Left);
-let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, Facing.Right);
+
+let player1 = new Player(w4.GAMEPAD1, 0x42, 90, groundLevel, Facing.Left);
+let player2 = new Player(w4.GAMEPAD2, 0x24, 60, groundLevel, Facing.Right);
 
 let players = [player1, player2];
 
-const groundLevel = 95;
 
 function onGround(player: Player): bool {
     return player.y >= groundLevel;
