@@ -8,7 +8,7 @@ let started = true; // for development, start game immediately
 
 class Player {
     constructor(
-        public gamepad: usize,
+        public gamepadPtr: usize,
         public drawColors: usize,
         public x: i32,
         public y: i32,
@@ -19,6 +19,7 @@ class Player {
         public health: i32,
         public lungeTimer: i32,
         public stunTimer: i32,
+        public prevGamepadState: u8,
     ) {
     }
 }
@@ -34,8 +35,8 @@ enum Stance {
     Low = 1,
 }
 
-let player1 = new Player(w4.GAMEPAD1, 0x42, 90, 80, 0, 0, Facing.Left, Stance.Mid, 100, 0, 0);
-let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0);
+let player1 = new Player(w4.GAMEPAD1, 0x42, 90, 80, 0, 0, Facing.Left, Stance.Mid, 100, 0, 0, 0);
+let player2 = new Player(w4.GAMEPAD2, 0x24, 60, 80, 0, 0, Facing.Right, Stance.Mid, 100, 0, 0, 0);
 
 let players = [player1, player2];
 
@@ -46,10 +47,12 @@ function onGround(player: Player): bool {
 }
 
 function updatePlayer(player: Player): void {
-    const gamepad = load<u8>(player.gamepad);
+    const gamepad = load<u8>(player.gamepadPtr);
     const grounded = onGround(player);
     const stunned = player.stunTimer > 0;
     const lunging = player.lungeTimer > 0;
+    const justPressedButton1 = gamepad & w4.BUTTON_1 && !(player.prevGamepadState & w4.BUTTON_1);
+    const justPressedButton2 = gamepad & w4.BUTTON_2 && !(player.prevGamepadState & w4.BUTTON_2);
     if (!lunging && !stunned) {
         player.vx = 0;
         if (gamepad & w4.BUTTON_LEFT) {
@@ -64,7 +67,7 @@ function updatePlayer(player: Player): void {
         player.vx *= 0.9;
     }
     if (grounded) {
-        if (gamepad & w4.BUTTON_1 && !stunned) {
+        if (justPressedButton1 && !stunned) {
             player.vy = -3;
         }
         if (gamepad & w4.BUTTON_UP) {
@@ -78,7 +81,7 @@ function updatePlayer(player: Player): void {
         player.vy += 0.2;
     }
 
-    if (gamepad & w4.BUTTON_2) {
+    if (justPressedButton2) {
         if (!lunging && !stunned) {
             player.lungeTimer = 15;
             player.vx = player.facing as f32 * 5;
@@ -107,6 +110,7 @@ function updatePlayer(player: Player): void {
     }
     player.lungeTimer--;
     player.stunTimer--;
+    player.prevGamepadState = gamepad;
 }
 
 function drawPlayer(player: Player): void {
@@ -125,7 +129,7 @@ function drawPlayer(player: Player): void {
 
     // debug
     // store<u16>(w4.DRAW_COLORS, 0x2);
-    // outlinedText(`lungeTimer: ${player.lungeTimer}`, player.x-40, player.y+(player.gamepad-w4.GAMEPAD1)*10);
+    // outlinedText(`lungeTimer: ${player.lungeTimer}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
 }
 
 export function start(): void {
