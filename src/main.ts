@@ -161,13 +161,13 @@ function drawGround(): void {
     store<u16>(w4.DRAW_COLORS, 0x3);
     w4.rect(0, groundLevel, 160, 160 - groundLevel)
     store<u16>(w4.DRAW_COLORS, 0x4);
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 100; i++) {
         const centerX = 80;
         const centerY = groundLevel + (160 - groundLevel) / 2;
-        const x = centerX + (Math.sin(i * 500) * 80) as i32;
-        const y = centerY + (Math.cos(i * 50) * (160 - groundLevel) / 2) as i32;
-        w4.line(x, y, x + (Math.sin(i * 420) + 0.1) as i32, y + 5 + Math.sin(i * 459) * 2 as i32);
-        w4.line(x + (Math.sin(i * 420) + 0.1) * 5 as i32, y, x + (Math.sin(i * 420) + 0.1) * 5 as i32, y + 5 + Math.sin(i * 459) * 2 as i32);
+        const x = centerX + (Math.sin(i * i * 500) * 80) as i32;
+        const y = centerY + (Math.cos(i * i * 5230) * (160 - groundLevel) / 2) as i32;
+        w4.line(x, y, x + (Math.sin(i * i * 420) + 0.1) as i32, y + 5 + Math.sin(i * i * 459) * 2 as i32);
+        w4.line(x + (Math.sin(i * i * 420) + 0.1) * 5 as i32, y, x + (Math.sin(i * i * 420) + 0.1) * 5 as i32, y + 5 + Math.sin(i * i * 459) * 2 as i32);
     }
 }
 
