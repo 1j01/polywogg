@@ -48,14 +48,18 @@ function onGround(player: Player): bool {
 function updatePlayer(player: Player): void {
     const gamepad = load<u8>(player.gamepad);
     const grounded = onGround(player);
-    player.vx = 0;
-    if (gamepad & w4.BUTTON_LEFT) {
-        player.vx -= 1;
-        player.facing = Facing.Left;
-    }
-    if (gamepad & w4.BUTTON_RIGHT) {
-        player.vx += 1;
-        player.facing = Facing.Right;
+    if (player.lungeTimer <= 0) {
+        player.vx = 0;
+        if (gamepad & w4.BUTTON_LEFT) {
+            player.vx -= 1;
+            player.facing = Facing.Left;
+        }
+        if (gamepad & w4.BUTTON_RIGHT) {
+            player.vx += 1;
+            player.facing = Facing.Right;
+        }
+    } else {
+        player.vx *= 0.9;
     }
     if (grounded) {
         if (gamepad & w4.BUTTON_1) {
@@ -72,11 +76,20 @@ function updatePlayer(player: Player): void {
         player.vy += 0.2;
     }
 
+    if (gamepad & w4.BUTTON_2) {
+        if (player.lungeTimer <= 0) {
+            player.lungeTimer = 15;
+            player.vx = player.facing as f32 * 5;
+        }
+    }
+
     player.x += player.vx as i32;
     player.y += player.vy as i32;
     if (player.y > groundLevel) {
         player.y = groundLevel;
     }
+    player.lungeTimer--;
+    player.stunTimer--;
 }
 
 function drawPlayer(player: Player): void {
@@ -92,6 +105,10 @@ function drawPlayer(player: Player): void {
     const swordY = player.y - 4 + (player.stance as i32);
 
     w4.line(swordX, swordY, swordX + (player.facing as i32) * 4, swordY + (player.stance as i32) * 3);
+
+    // debug
+    // store<u16>(w4.DRAW_COLORS, 0x2);
+    // outlinedText(`lungeTimer: ${player.lungeTimer}`, player.x-40, player.y+(player.gamepad-w4.GAMEPAD1)*10);
 }
 
 export function start(): void {
