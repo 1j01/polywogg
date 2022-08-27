@@ -47,8 +47,8 @@ function initMatch(): void {
     timeSinceMatchStart = 0;
     timeSinceMatchEnd = 0;
     players = [
-        new Player(w4.GAMEPAD1, 0x42, 90, groundLevel, Facing.Left),
-        new Player(w4.GAMEPAD2, 0x24, 60, groundLevel, Facing.Right),
+        new Player(w4.GAMEPAD1, 0x34, 90, groundLevel, Facing.Left),
+        new Player(w4.GAMEPAD2, 0x43, 60, groundLevel, Facing.Right),
     ];
 }
 
@@ -181,15 +181,16 @@ function drawPlayer(player: Player): void {
 export function start(): void {
     // palette by Polyphrog - appropriate for a game called "Polywogg"
     // https://lospec.com/palette-list/black-tar
-    store<u32>(w4.PALETTE, 0x843c35, 0 * sizeof<u32>());
-    store<u32>(w4.PALETTE, 0xffeb94, 1 * sizeof<u32>());
-    store<u32>(w4.PALETTE, 0x398a75, 2 * sizeof<u32>());
-    store<u32>(w4.PALETTE, 0x26153a, 3 * sizeof<u32>());
+    // store<u32>(w4.PALETTE, 0x843c35, 0 * sizeof<u32>());
+    // store<u32>(w4.PALETTE, 0xffeb94, 1 * sizeof<u32>());
+    // store<u32>(w4.PALETTE, 0x398a75, 2 * sizeof<u32>());
+    // store<u32>(w4.PALETTE, 0x26153a, 3 * sizeof<u32>());
     // https://lospec.com/palette-list/lava-level
-    // store<u32>(w4.PALETTE, 0x726059, 0 * sizeof<u32>());
-    // store<u32>(w4.PALETTE, 0x301922, 1 * sizeof<u32>());
-    // store<u32>(w4.PALETTE, 0xcf331e, 2 * sizeof<u32>());
-    // store<u32>(w4.PALETTE, 0xf29d2c, 3 * sizeof<u32>());
+    // rearranged so black is 0 (affects the clear color)
+    store<u32>(w4.PALETTE, 0x301922, 0 * sizeof<u32>());
+    store<u32>(w4.PALETTE, 0x726059, 1 * sizeof<u32>());
+    store<u32>(w4.PALETTE, 0xcf331e, 2 * sizeof<u32>());
+    store<u32>(w4.PALETTE, 0xf29d2c, 3 * sizeof<u32>());
 
     initMatch();
 }
@@ -206,17 +207,28 @@ function outlinedText(text: string, x: i32, y: i32): void {
 }
 
 function drawGround(): void {
-    store<u16>(w4.DRAW_COLORS, 0x3);
+    store<u16>(w4.DRAW_COLORS, 0x1);
     w4.rect(0, groundLevel, 160, 160 - groundLevel)
-    store<u16>(w4.DRAW_COLORS, 0x4);
-    for (let i = 0; i < 100; i++) {
-        const centerX = 80;
-        const centerY = groundLevel + (160 - groundLevel) / 2;
-        const x = centerX + (Math.sin(i * i * 500) * 80) as i32;
-        const y = centerY + (Math.cos(i * i * 5230) * (160 - groundLevel) / 2) as i32;
-        w4.line(x, y, x + (Math.sin(i * i * 420) + 0.1) as i32, y + 5 + Math.sin(i * i * 459) * 2 as i32);
-        w4.line(x + (Math.sin(i * i * 420) + 0.1) * 5 as i32, y, x + (Math.sin(i * i * 420) + 0.1) * 5 as i32, y + 5 + Math.sin(i * i * 459) * 2 as i32);
+    store<u16>(w4.DRAW_COLORS, 0x2);
+    for (let i = 0; i < 160; i++) {
+        const x = i;
+        const y = groundLevel;
+        // w4.line(x, y, x, y + (1 + Math.tan(i * 2)) * 2 as i32);
+        w4.line(x, y, x, y + (1 + Math.sin(i * 200)) * 2 as i32);
     }
+
+    // grassy style
+    // store<u16>(w4.DRAW_COLORS, 0x3);
+    // w4.rect(0, groundLevel, 160, 160 - groundLevel)
+    // store<u16>(w4.DRAW_COLORS, 0x4);
+    // for (let i = 0; i < 100; i++) {
+    //     const centerX = 80;
+    //     const centerY = groundLevel + (160 - groundLevel) / 2;
+    //     const x = centerX + (Math.sin(i * i * 500) * 80) as i32;
+    //     const y = centerY + (Math.cos(i * i * 5230) * (160 - groundLevel) / 2) as i32;
+    //     w4.line(x, y, x + (Math.sin(i * i * 420) + 0.1) as i32, y + 5 + Math.sin(i * i * 459) * 2 as i32);
+    //     w4.line(x + (Math.sin(i * i * 420) + 0.1) * 5 as i32, y, x + (Math.sin(i * i * 420) + 0.1) * 5 as i32, y + 5 + Math.sin(i * i * 459) * 2 as i32);
+    // }
 }
 
 export function update(): void {
