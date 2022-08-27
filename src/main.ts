@@ -4,8 +4,6 @@ import { playerMidSprite } from "../build/png2src-generated/playerMid";
 // import { playerHighSprite } from "../build/png2src-generated/playerHigh";
 import { playerLowSprite } from "../build/png2src-generated/playerLow";
 
-let started = true; // for development, start game immediately
-
 const groundLevel = 95;
 
 class Player {
@@ -16,6 +14,8 @@ class Player {
     public prevGamepadState: u8 = 0xff; // bits set to prevent jumping when starting game
     public vx: f32;
     public vy: f32;
+    // public ready: bool = true; // for development, start game immediately
+    public ready: bool = false;
     constructor(
         public gamepadPtr: usize,
         public drawColors: usize,
@@ -177,13 +177,7 @@ export function update(): void {
 
     outlinedText("Welcome to\n\n    Polywogg!", 10, 10);
 
-    const gamepad = load<u8>(w4.GAMEPAD1);
-    if (gamepad & w4.BUTTON_1) {
-        if (!started) {
-            started = true;
-        }
-        store<u16>(w4.DRAW_COLORS, 3);
-    }
+    const started = players.every((player) => player.ready);
 
     if (started) {
         drawGround();
@@ -192,7 +186,16 @@ export function update(): void {
             drawPlayer(players[i]);
         }
     } else {
-        store<u16>(w4.DRAW_COLORS, 0x23);
-        w4.text("Press X to start", 16, 90);
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
+            store<u16>(w4.DRAW_COLORS, 0x23);
+            const gamepad = load<u8>(player.gamepadPtr);
+            const button1 = gamepad & w4.BUTTON_1;
+            if (button1) {
+                player.ready = true;
+            }
+            const message = player.ready ? "Ready!" : "Press X to start";
+            w4.text(`P${i + 1}: ${message}`, 0, 90 + i * 20);
+        }
     }
 }
