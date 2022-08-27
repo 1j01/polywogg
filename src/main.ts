@@ -74,23 +74,26 @@ function updatePlayer(player: Player): void {
         } else {
             player.vx *= 0.9;
         }
-        // Tilting and jumping
+
+        // Tilting
+        if (gamepad & w4.BUTTON_UP) {
+            player.stance = Stance.High;
+        } else if (gamepad & w4.BUTTON_DOWN) {
+            player.stance = Stance.Low;
+        } else {
+            player.stance = Stance.Mid;
+        }
+
+        // Jumping
         if (grounded) {
             if (justPressedButton1 && !stunned) {
                 player.vy = -3;
-            }
-            if (gamepad & w4.BUTTON_UP) {
-                player.stance = Stance.High;
-            } else if (gamepad & w4.BUTTON_DOWN) {
-                player.stance = Stance.Low;
-            } else {
-                player.stance = Stance.Mid;
             }
         } else {
             player.vy += 0.2;
         }
 
-        // Trigger attacking
+        // Starting attacking
         if (justPressedButton2) {
             if (!lunging && !stunned) {
                 player.lungeTimer = 15;
