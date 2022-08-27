@@ -119,7 +119,7 @@ function updatePlayer(player: Player): void {
                     if (blocked) {
                         player.vx *= 0.3;
                     } else {
-                        otherPlayer.health -= 10;
+                        otherPlayer.health = 0;
                     }
                 }
             }
