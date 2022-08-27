@@ -43,6 +43,7 @@ let player2 = new Player(w4.GAMEPAD2, 0x24, 60, groundLevel, Facing.Right);
 
 let players = [player1, player2];
 
+let t = 0;
 
 function onGround(player: Player): bool {
     return player.y >= groundLevel;
@@ -175,17 +176,27 @@ function drawGround(): void {
 
 export function update(): void {
 
-    const started = players.every((player) => player.ready);
+    const ready = players.every((player) => player.ready);
 
-    if (started) {
-        outlinedText("Fight!", 60, 10);
+    if (ready) {
+        t++;
+        const countdownTime = 60 * 5;
+        const fightFlashTime = 50;
+        if (t < countdownTime) {
+            outlinedText(Math.ceil((countdownTime - t) as f32 / 60).toString().at(0), 75, 10);
+        } else if (t < countdownTime + fightFlashTime && (t % 10) < 5) {
+            outlinedText("Fight!", 60, 10);
+        }
 
         drawGround();
         for (let i = 0; i < players.length; i++) {
-            updatePlayer(players[i]);
+            if (t >= countdownTime) {
+                updatePlayer(players[i]);
+            }
             drawPlayer(players[i]);
         }
     } else {
+        t = 0;
         outlinedText("Welcome to\n\n    Polywogg!", 10, 10);
 
         for (let i = 0; i < players.length; i++) {
