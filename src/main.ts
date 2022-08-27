@@ -105,6 +105,9 @@ function updatePlayer(player: Player): void {
         for (let i = 0; i < players.length; i++) {
             if (players[i] === player) continue;
             const otherPlayer = players[i];
+            const blocked =
+                otherPlayer.stance == player.stance &&
+                otherPlayer.facing !== player.facing;
             if (lunging) {
                 if (
                     Math.abs(otherPlayer.x - player.x + player.facing as i32 * 5) < 9 &&
@@ -113,7 +116,11 @@ function updatePlayer(player: Player): void {
                 ) {
                     otherPlayer.vx += player.facing as f32 * 3;
                     otherPlayer.stunTimer = 10;
-                    otherPlayer.health -= 10;
+                    if (blocked) {
+                        player.vx *= 0.3;
+                    } else {
+                        otherPlayer.health -= 10;
+                    }
                 }
             }
         }
