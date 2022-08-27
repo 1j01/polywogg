@@ -38,13 +38,19 @@ enum Stance {
     Low = 1,
 }
 
+let players: Player[];
 
-let player1 = new Player(w4.GAMEPAD1, 0x42, 90, groundLevel, Facing.Left);
-let player2 = new Player(w4.GAMEPAD2, 0x24, 60, groundLevel, Facing.Right);
+let timeSinceMatchStart = 0;
+let timeSinceMatchEnd = 0;
 
-let players = [player1, player2];
-
-let t = 0;
+function initMatch(): void {
+    timeSinceMatchStart = 0;
+    timeSinceMatchEnd = 0;
+    players = [
+        new Player(w4.GAMEPAD1, 0x42, 90, groundLevel, Facing.Left),
+        new Player(w4.GAMEPAD2, 0x24, 60, groundLevel, Facing.Right),
+    ];
+}
 
 function onGround(player: Player): bool {
     return player.y >= groundLevel;
@@ -169,7 +175,6 @@ function drawPlayer(player: Player): void {
     w4.line(swordX, swordY, swordX + (player.facing as i32) * 4, swordY + (player.stance as i32) * 3);
 
     // debug
-    // store<u16>(w4.DRAW_COLORS, 0x2);
     // outlinedText(`lungeTimer: ${player.lungeTimer}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
 }
 
@@ -185,6 +190,8 @@ export function start(): void {
     // store<u32>(w4.PALETTE, 0x301922, 1 * sizeof<u32>());
     // store<u32>(w4.PALETTE, 0xcf331e, 2 * sizeof<u32>());
     // store<u32>(w4.PALETTE, 0xf29d2c, 3 * sizeof<u32>());
+
+    initMatch();
 }
 
 function outlinedText(text: string, x: i32, y: i32): void {
@@ -217,24 +224,33 @@ export function update(): void {
     const ready = players.every((player) => player.ready);
 
     if (ready) {
-        t++;
+        timeSinceMatchStart++;
+        const ended = players.some((player) => player.health <= 0);
+        if (ended) {
+            timeSinceMatchEnd++;
+        }
         const countdownTime = skipReadyWaiting ? 0 : 60 * 5;
         const fightFlashTime = 50;
-        if (t < countdownTime) {
-            outlinedText(Math.ceil((countdownTime - t) as f32 / 60).toString().at(0), 75, 10);
-        } else if (t < countdownTime + fightFlashTime && (t % 10) < 5) {
+        if (timeSinceMatchStart < countdownTime) {
+            outlinedText(Math.ceil((countdownTime - timeSinceMatchStart) as f32 / 60).toString().at(0), 75, 10);
+        } else if (timeSinceMatchStart < countdownTime + fightFlashTime && (timeSinceMatchStart % 10) < 5) {
             outlinedText("Fight!", 60, 10);
+        }
+        const delayBeforeReset = 50;
+        if (timeSinceMatchEnd > delayBeforeReset) {
+            initMatch();
         }
 
         drawGround();
         for (let i = 0; i < players.length; i++) {
-            if (t >= countdownTime) {
+            if (timeSinceMatchStart >= countdownTime) {
                 updatePlayer(players[i]);
             }
             drawPlayer(players[i]);
         }
     } else {
-        t = 0;
+        timeSinceMatchStart = 0;
+        timeSinceMatchEnd = 0;
         outlinedText("Welcome to\n\n    Polywogg!", 10, 10);
 
         for (let i = 0; i < players.length; i++) {
