@@ -246,6 +246,7 @@ export function update(): void {
         const countdownTime = skipReadyWaiting ? 0 : 60 * 5;
         const fightFlashTime = 50;
         if (timeSinceMatchStart < countdownTime) {
+            store<u8>(w4.DRAW_COLORS, 0x43);
             outlinedText(Math.ceil((countdownTime - timeSinceMatchStart) as f32 / 60).toString().at(0), 75, 10);
         } else if (timeSinceMatchStart < countdownTime + fightFlashTime) {
             store<u8>(w4.DRAW_COLORS, (timeSinceMatchStart % 10) < 5 ? 0x34 : 0x43);
@@ -266,17 +267,18 @@ export function update(): void {
     } else {
         timeSinceMatchStart = 0;
         timeSinceMatchEnd = 0;
+        store<u8>(w4.DRAW_COLORS, 0x43);
         outlinedText("Welcome to\n\n    Polywogg!", 10, 10);
 
         for (let i = 0; i < players.length; i++) {
             const player = players[i];
-            store<u16>(w4.DRAW_COLORS, player.drawColors);
             const gamepad = load<u8>(player.gamepadPtr);
             const button1 = gamepad & w4.BUTTON_1;
             if (button1) {
                 player.ready = true;
             }
             const message = player.ready ? "Ready!" : "Waiting...";
+            store<u16>(w4.DRAW_COLORS, player.drawColors);
             w4.text(`P${i + 1}: ${message}`, 20, 90 + i * 20);
         }
     }
