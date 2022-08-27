@@ -4,6 +4,8 @@ import { playerMidSprite } from "../build/png2src-generated/playerMid";
 // import { playerHighSprite } from "../build/png2src-generated/playerHigh";
 import { playerLowSprite } from "../build/png2src-generated/playerLow";
 
+const skipReadyWaiting = true; // for development, start game immediately
+
 const groundLevel = 95;
 
 class Player {
@@ -14,8 +16,7 @@ class Player {
     public prevGamepadState: u8 = 0xff; // bits set to prevent jumping when starting game
     public vx: f32;
     public vy: f32;
-    // public ready: bool = true; // for development, start game immediately
-    public ready: bool = false;
+    public ready: bool = skipReadyWaiting;
     constructor(
         public gamepadPtr: usize,
         public drawColors: usize,
@@ -180,7 +181,7 @@ export function update(): void {
 
     if (ready) {
         t++;
-        const countdownTime = 60 * 5;
+        const countdownTime = skipReadyWaiting ? 0 : 60 * 5;
         const fightFlashTime = 50;
         if (t < countdownTime) {
             outlinedText(Math.ceil((countdownTime - t) as f32 / 60).toString().at(0), 75, 10);
