@@ -196,13 +196,15 @@ export function start(): void {
 }
 
 function outlinedText(text: string, x: i32, y: i32): void {
-    store<u16>(w4.DRAW_COLORS, 0x4);
+    const paletteColorA = u8(load<u16>(w4.DRAW_COLORS) & 0b1111);
+    const paletteColorB = u8((load<u16>(w4.DRAW_COLORS) & 0b11110000) >> 4);
+    store<u16>(w4.DRAW_COLORS, paletteColorB);
     w4.text(text, x - 1, y);
     w4.text(text, x + 1, y);
     w4.text(text, x, y - 1);
     w4.text(text, x, y + 1);
     w4.text(text, x + 1, y + 1); // shadow
-    store<u16>(w4.DRAW_COLORS, 0x2);
+    store<u16>(w4.DRAW_COLORS, paletteColorA);
     w4.text(text, x, y);
 }
 
@@ -245,7 +247,8 @@ export function update(): void {
         const fightFlashTime = 50;
         if (timeSinceMatchStart < countdownTime) {
             outlinedText(Math.ceil((countdownTime - timeSinceMatchStart) as f32 / 60).toString().at(0), 75, 10);
-        } else if (timeSinceMatchStart < countdownTime + fightFlashTime && (timeSinceMatchStart % 10) < 5) {
+        } else if (timeSinceMatchStart < countdownTime + fightFlashTime) {
+            store<u8>(w4.DRAW_COLORS, (timeSinceMatchStart % 10) < 5 ? 0x34 : 0x43);
             outlinedText("Fight!", 60, 10);
         }
         const delayBeforeReset = 50;
