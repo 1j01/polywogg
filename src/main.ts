@@ -233,6 +233,44 @@ function drawGround(): void {
     // }
 }
 
+function drawArch(x: i32, y: i32, w: i32, h: i32): void {
+    store<u16>(w4.DRAW_COLORS, 0x21);
+    drawBricks(x, y, w, h);
+
+    const archW = w * 2 / 4;
+    const archH = h * 2 / 3; // not including curved part
+    const archX = x + (w - archW) / 2;
+    const archY = y + h - archH;
+
+    store<u16>(w4.DRAW_COLORS, 0x11);
+    w4.oval(archX, archY - archW / 2, archW, archW);
+    w4.rect(archX, archY, archW, archH);
+}
+
+function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
+    // w4.rect(x, y, w, h);
+    for (let loopY = y; loopY < y + h; loopY += 4) {
+        for (let loopX = x - (loopY % 8) * 3; loopX < x + w; loopX += 9) {
+            w4.rect(
+                Math.max(loopX, x) as i32,
+                loopY,
+                Math.min(10, x + w - loopX) as i32,
+                5
+            );
+        }
+    }
+}
+
+// function drawChains(x: i32, y: i32, w: i32, h: i32): void {
+//     store<u16>(w4.DRAW_COLORS, 0x12);
+//     w4.rect(x, y, w, h);
+//     for (let loopY = y; loopY < y + h; loopY += 3) {
+//         for (let loopX = x + loopY % 4; loopX < x + w; loopX += 5) {
+//             w4.rect(loopX, loopY, 3, 5);
+//         }
+//     }
+// }
+
 export function update(): void {
 
     const ready = players.every((player) => player.ready);
@@ -258,6 +296,7 @@ export function update(): void {
         }
 
         drawGround();
+        drawArch(50, groundLevel - 60, 50, 60);
         for (let i = 0; i < players.length; i++) {
             if (timeSinceMatchStart >= countdownTime) {
                 updatePlayer(players[i]);
