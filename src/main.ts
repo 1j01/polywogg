@@ -175,17 +175,19 @@ function drawGround(): void {
 
 export function update(): void {
 
-    outlinedText("Welcome to\n\n    Polywogg!", 10, 10);
-
     const started = players.every((player) => player.ready);
 
     if (started) {
+        outlinedText("Fight!", 60, 10);
+
         drawGround();
         for (let i = 0; i < players.length; i++) {
             updatePlayer(players[i]);
             drawPlayer(players[i]);
         }
     } else {
+        outlinedText("Welcome to\n\n    Polywogg!", 10, 10);
+
         for (let i = 0; i < players.length; i++) {
             const player = players[i];
             store<u16>(w4.DRAW_COLORS, 0x23);
