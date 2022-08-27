@@ -240,9 +240,25 @@ function drawArch(x: i32, y: i32, w: i32, h: i32): void {
     const archY = y + h - archH;
 
     store<u16>(w4.DRAW_COLORS, 0x21);
+    drawBricks(x, y, w, h - archH);
+    store<u16>(w4.DRAW_COLORS, 0x21);
+    const centerX = archX + archW / 2;
+    const centerY = archY;
+    const brickR: i32 = archW * 0.7 as i32;
+    w4.oval(centerX - brickR, centerY - brickR, brickR * 2, brickR * 2);
+    store<u16>(w4.DRAW_COLORS, 0x2);
+    const nRadialBricks = 7;
+    for (let i = 0; i < nRadialBricks; i++) {
+        const angle: f64 = (i as f64) / nRadialBricks * -Math.PI;
+        let x2: i32 = centerX + Math.cos(angle) * (brickR - 0.5) as i32;
+        let y2: i32 = centerY + Math.sin(angle) * (brickR - 0.5) as i32;
+        // x2 = Math.max(Math.min(x2, x + w - 1), x) as i32;
+        // y2 = Math.max(Math.min(y2, y + h - 1), y) as i32;
+        w4.line(centerX, centerY, x2, y2);
+    }
+    store<u16>(w4.DRAW_COLORS, 0x21);
     drawBricks(x, archY, w - (archW * 3 / 2), archH);
     drawBricks(x + (archW * 3 / 2), archY, w - (archW * 3 / 2), archH);
-    drawBricks(x, y, w, h - archH);
 
     store<u16>(w4.DRAW_COLORS, 0x21);
     w4.oval(archX, archY - archW / 2, archW, archW);
