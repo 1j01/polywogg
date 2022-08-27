@@ -267,7 +267,7 @@ export function update(): void {
 
         for (let i = 0; i < players.length; i++) {
             const player = players[i];
-            store<u16>(w4.DRAW_COLORS, 0x23);
+            store<u16>(w4.DRAW_COLORS, player.drawColors);
             const gamepad = load<u8>(player.gamepadPtr);
             const button1 = gamepad & w4.BUTTON_1;
             if (button1) {
