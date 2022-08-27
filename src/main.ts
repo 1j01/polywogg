@@ -240,8 +240,8 @@ function drawArch(x: i32, y: i32, w: i32, h: i32): void {
     const archY = y + h - archH;
 
     store<u16>(w4.DRAW_COLORS, 0x21);
-    drawBricks(x, y, w - (archW * 3 / 2), h);
-    drawBricks(x + (archW * 3 / 2), y, w - (archW * 3 / 2), h);
+    drawBricks(x, archY, w - (archW * 3 / 2), archH);
+    drawBricks(x + (archW * 3 / 2), archY, w - (archW * 3 / 2), archH);
     drawBricks(x, y, w, h - archH);
 
     store<u16>(w4.DRAW_COLORS, 0x21);
