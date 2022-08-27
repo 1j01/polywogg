@@ -207,8 +207,8 @@ export function update(): void {
             if (button1) {
                 player.ready = true;
             }
-            const message = player.ready ? "Ready!" : "Press X to start";
-            w4.text(`P${i + 1}: ${message}`, 0, 90 + i * 20);
+            const message = player.ready ? "Ready!" : "Waiting...";
+            w4.text(`P${i + 1}: ${message}`, 20, 90 + i * 20);
         }
     }
 }
