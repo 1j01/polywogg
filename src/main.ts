@@ -53,65 +53,78 @@ function onGround(player: Player): bool {
 function updatePlayer(player: Player): void {
     const gamepad = load<u8>(player.gamepadPtr);
     const grounded = onGround(player);
+    const dead = player.health <= 0;
     const stunned = player.stunTimer > 0;
     const lunging = player.lungeTimer > 0;
     const justPressedButton1 = gamepad & w4.BUTTON_1 && !(player.prevGamepadState & w4.BUTTON_1);
     const justPressedButton2 = gamepad & w4.BUTTON_2 && !(player.prevGamepadState & w4.BUTTON_2);
-    if (!lunging && !stunned) {
-        player.vx = 0;
-        if (gamepad & w4.BUTTON_LEFT) {
-            player.vx -= 1;
-            player.facing = Facing.Left;
+
+    if (!dead) {
+        // Movement
+        if (!lunging && !stunned) {
+            player.vx = 0;
+            if (gamepad & w4.BUTTON_LEFT) {
+                player.vx -= 1;
+                player.facing = Facing.Left;
+            }
+            if (gamepad & w4.BUTTON_RIGHT) {
+                player.vx += 1;
+                player.facing = Facing.Right;
+            }
+        } else {
+            player.vx *= 0.9;
         }
-        if (gamepad & w4.BUTTON_RIGHT) {
-            player.vx += 1;
-            player.facing = Facing.Right;
+        // Tilting and jumping
+        if (grounded) {
+            if (justPressedButton1 && !stunned) {
+                player.vy = -3;
+            }
+            if (gamepad & w4.BUTTON_UP) {
+                player.stance = Stance.High;
+            } else if (gamepad & w4.BUTTON_DOWN) {
+                player.stance = Stance.Low;
+            } else {
+                player.stance = Stance.Mid;
+            }
+        } else {
+            player.vy += 0.2;
+        }
+
+        // Trigger attacking
+        if (justPressedButton2) {
+            if (!lunging && !stunned) {
+                player.lungeTimer = 15;
+                player.vx = player.facing as f32 * 5;
+            }
+        }
+
+        // Handle attacking other players
+        for (let i = 0; i < players.length; i++) {
+            if (players[i] === player) continue;
+            const otherPlayer = players[i];
+            if (lunging) {
+                if (
+                    Math.abs(otherPlayer.x - player.x + player.facing as i32 * 5) < 9 &&
+                    otherPlayer.stunTimer <= 0 // TODO: separate invincibility timer
+                ) {
+                    otherPlayer.vx += player.facing as f32 * 3;
+                    otherPlayer.stunTimer = 10;
+                    otherPlayer.health -= 10;
+                }
+            }
         }
     } else {
         player.vx *= 0.9;
     }
-    if (grounded) {
-        if (justPressedButton1 && !stunned) {
-            player.vy = -3;
-        }
-        if (gamepad & w4.BUTTON_UP) {
-            player.stance = Stance.High;
-        } else if (gamepad & w4.BUTTON_DOWN) {
-            player.stance = Stance.Low;
-        } else {
-            player.stance = Stance.Mid;
-        }
-    } else {
-        player.vy += 0.2;
-    }
 
-    if (justPressedButton2) {
-        if (!lunging && !stunned) {
-            player.lungeTimer = 15;
-            player.vx = player.facing as f32 * 5;
-        }
-    }
-
-    for (let i = 0; i < players.length; i++) {
-        if (players[i] === player) continue;
-        const otherPlayer = players[i];
-        if (lunging) {
-            if (
-                Math.abs(otherPlayer.x - player.x + player.facing as i32 * 5) < 9 &&
-                otherPlayer.stunTimer <= 0 // TODO: separate invincibility timer
-            ) {
-                otherPlayer.vx += player.facing as f32 * 3;
-                otherPlayer.stunTimer = 10;
-                otherPlayer.health -= 10;
-            }
-        }
-    }
-
+    // Ballistic motion
     player.x += player.vx as i32;
     player.y += player.vy as i32;
     if (player.y > groundLevel) {
         player.y = groundLevel;
     }
+
+    // Time
     player.lungeTimer--;
     player.stunTimer--;
     player.prevGamepadState = gamepad;
@@ -119,10 +132,22 @@ function updatePlayer(player: Player): void {
 
 function drawPlayer(player: Player): void {
     store<u16>(w4.DRAW_COLORS, player.drawColors);
+    const dead = player.health <= 0;
     const sprite = player.stance == Stance.Low ? playerLowSprite : playerMidSprite;
     const x = player.x - (sprite.width / 2);
-    const y = player.y - sprite.height;
-    const flags = sprite.flags | (w4.BLIT_FLIP_X * (player.facing == Facing.Left ? 1 : 0));
+    let y = player.y - sprite.height;
+    let flags = sprite.flags;
+    if (dead) {
+        flags |= w4.BLIT_ROTATE;
+        if (player.facing == Facing.Left) {
+            flags |= w4.BLIT_FLIP_Y;
+        }
+        y += 2;
+    } else {
+        if (player.facing == Facing.Left) {
+            flags |= w4.BLIT_FLIP_X;
+        }
+    }
     w4.blit(sprite.data, x, y, sprite.width, sprite.height, flags);
 
     // draw sword
