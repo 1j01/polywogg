@@ -56,17 +56,26 @@ let timeSinceMatchEnd = 0;
 function initMatch(): void {
     timeSinceMatchStart = 0;
     timeSinceMatchEnd = 0;
+    const centerX = 80;
     players = [
-        new Player(w4.GAMEPAD1, 0x34, 90, groundLevel, Facing.Left),
-        new Player(w4.GAMEPAD2, 0x43, 60, groundLevel, Facing.Right),
+        new Player(w4.GAMEPAD1, 0x34, centerX + 30, groundLevel, Facing.Left),
+        new Player(w4.GAMEPAD2, 0x43, centerX - 30, groundLevel, Facing.Right),
     ];
     arches = [
         // new Arch(50, groundLevel - 60, 51, 60),
     ];
+    let xOff = 0;
     for (let i = 0; i < 5; i++) {
-        const w = i * 30 + 21;
-        const h = i * 30 + 30;
-        arches.push(new Arch(i * 50, groundLevel - h, w, h));
+        const w = i * 20 + 21;
+        const h = i * 20 + 20;
+        if (i != 0) {
+            xOff += w / 2;
+        }
+        arches.push(new Arch(centerX + xOff - w / 2, groundLevel - h, w, h));
+        if (i != 0) {
+            arches.push(new Arch(centerX - xOff - w / 2, groundLevel - h, w, h));
+        }
+        xOff += w / 2;
     }
 }
 
