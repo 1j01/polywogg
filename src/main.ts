@@ -313,18 +313,21 @@ function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
         }
     }
     // vines
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 9; i++) {
         let vineX = x + (Math.sin(x * y * w + h * i) * w + w / 2) as i32;
         let vineY = y + h;
         for (let j = 0; j < 15; j++) {
-            const newX = vineX + Math.round(Math.sin(x * y * w + h * i + j * x * y) * 2) as i32;
-            const newY = vineY - 1;
+            const newX = vineX + Math.round(Math.sin(x * y * w + h * i + j * x * y + j) * 2) as i32;
+            const newY = vineY - (4 + Math.sin(x + y + i + j)) as i32;
             store<u16>(w4.DRAW_COLORS, 0x2);
-            w4.line(vineX, vineY, newX, newY + 1);
+            w4.line(vineX + 1, vineY - 1, newX + 1, newY - 1);
             store<u16>(w4.DRAW_COLORS, 0x1);
             w4.line(vineX, vineY, newX, newY);
             vineX = newX;
             vineY = newY;
+            if (vineY < y || vineX > x + w || vineX < x) {
+                break;
+            }
         }
     }
 
