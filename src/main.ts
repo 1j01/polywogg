@@ -27,6 +27,15 @@ class Player {
     }
 }
 
+class Arch {
+    constructor(
+        public x: i32,
+        public y: i32,
+        public w: i32,
+        public h: i32,
+    ) { }
+}
+
 enum Facing {
     Left = -1,
     Right = 1,
@@ -39,6 +48,7 @@ enum Stance {
 }
 
 let players: Player[];
+let arches: Arch[];
 
 let timeSinceMatchStart = 0;
 let timeSinceMatchEnd = 0;
@@ -50,6 +60,14 @@ function initMatch(): void {
         new Player(w4.GAMEPAD1, 0x34, 90, groundLevel, Facing.Left),
         new Player(w4.GAMEPAD2, 0x43, 60, groundLevel, Facing.Right),
     ];
+    arches = [
+        // new Arch(50, groundLevel - 60, 51, 60),
+    ];
+    for (let i = 0; i < 5; i++) {
+        const w = i * 30 + 21;
+        const h = i * 30 + 30;
+        arches.push(new Arch(i * 50, groundLevel - h, w, h));
+    }
 }
 
 function onGround(player: Player): bool {
@@ -315,7 +333,10 @@ export function update(): void {
         }
 
         drawGround();
-        drawArch(50, groundLevel - 60, 51, 60);
+        for (let i = 0; i < arches.length; i++) {
+            const a = arches[i];
+            drawArch(a.x, a.y, a.w, a.h);
+        }
         for (let i = 0; i < players.length; i++) {
             if (timeSinceMatchStart >= countdownTime) {
                 updatePlayer(players[i]);
