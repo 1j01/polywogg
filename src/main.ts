@@ -325,6 +325,11 @@ function drawArch(x: i32, y: i32, w: i32, h: i32): void {
     // make top clearer as a platform
     store<u16>(w4.DRAW_COLORS, 0x2);
     w4.rect(x + 1, y - 1, w - 2, 1);
+    for (let i = 0; i < w; i++) {
+        const lineX = x + i;
+        // w4.line(x, y, x, y + (1 + Math.tan(i * 2)) * 2 as i32);
+        w4.line(lineX, y, lineX, y + (1 + Math.sin(i * 200)) * 2 as i32);
+    }
 }
 
 function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
