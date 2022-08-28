@@ -54,6 +54,9 @@ let arches: Arch[];
 let timeSinceMatchStart = 0;
 let timeSinceMatchEnd = 0;
 
+// outside of start() function because it doesn't seem to work with netplay otherwise
+initMatch();
+
 function initMatch(): void {
     timeSinceMatchStart = 0;
     timeSinceMatchEnd = 0;
@@ -234,7 +237,6 @@ function drawPlayer(player: Player): void {
     // debug
     // outlinedText(`lungeTimer: ${player.lungeTimer}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
 }
-
 export function start(): void {
     // palette by Polyphrog - appropriate for a game called "Polywogg"
     // https://lospec.com/palette-list/black-tar
@@ -249,7 +251,8 @@ export function start(): void {
     store<u32>(w4.PALETTE, 0xcf331e, 2 * sizeof<u32>());
     store<u32>(w4.PALETTE, 0xf29d2c, 3 * sizeof<u32>());
 
-    initMatch();
+    // Game logic initialized at top level because doing it in here doesn't seem to work with netplay.
+    // https://github.com/aduros/wasm4/issues/542
 }
 
 function outlinedText(text: string, x: i32, y: i32): void {
