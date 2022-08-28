@@ -288,12 +288,16 @@ function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
     // w4.rect(x, y, w, h);
     for (let loopY = y; loopY < y + h; loopY += 4) {
         for (let loopX = x - (loopY % 8) * 3; loopX < x + w; loopX += 9) {
-            w4.rect(
-                Math.max(loopX, x) as i32,
-                loopY,
-                Math.min(10, x + w - loopX) as i32,
-                5
-            );
+            const x1 = Math.max(loopX, x) as i32;
+            const x2 = Math.min(x + w, loopX + 10) as i32;
+            if (x2 > x1) {
+                w4.rect(
+                    x1,
+                    loopY,
+                    x2 - x1,
+                    5
+                );
+            }
         }
     }
 }
