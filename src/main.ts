@@ -6,7 +6,7 @@ import { playerLowSprite } from "../build/png2src-generated/playerLow";
 
 const skipReadyWaiting = true; // for development, start game immediately
 
-const groundLevel = 95;
+const groundLevel = 121;
 
 class Player {
     public stance: Stance;
@@ -61,13 +61,15 @@ function initMatch(): void {
         new Player(w4.GAMEPAD1, 0x34, centerX + 30, groundLevel, Facing.Left),
         new Player(w4.GAMEPAD2, 0x43, centerX - 30, groundLevel, Facing.Right),
     ];
+    const w = 161;
+    const h = 161;
     arches = [
-        // new Arch(50, groundLevel - 60, 51, 60),
+        new Arch(centerX - w / 2, groundLevel - h, w, h)
     ];
     let xOff = 0;
-    for (let i = 0; i < 5; i++) {
-        const w = i * 20 + 21;
-        const h = i * 20 + 20;
+    for (let i = 0; i < 2; i++) {
+        const w = (1 - i) * 20 + 21;
+        const h = (1 - i) * 20 + 20;
         if (i != 0) {
             xOff += w / 2;
         }
@@ -333,13 +335,7 @@ export function update(): void {
         }
         const countdownTime = skipReadyWaiting ? 0 : 60 * 5;
         const fightFlashTime = 50;
-        if (timeSinceMatchStart < countdownTime) {
-            store<u8>(w4.DRAW_COLORS, 0x43);
-            outlinedText(Math.ceil((countdownTime - timeSinceMatchStart) as f32 / 60).toString().at(0), 75, 10);
-        } else if (timeSinceMatchStart < countdownTime + fightFlashTime) {
-            store<u8>(w4.DRAW_COLORS, (timeSinceMatchStart % 10) < 5 ? 0x34 : 0x43);
-            outlinedText("Fight!", 60, 10);
-        }
+
         const delayBeforeReset = 50;
         if (timeSinceMatchEnd > delayBeforeReset) {
             initMatch();
@@ -355,6 +351,14 @@ export function update(): void {
                 updatePlayer(players[i]);
             }
             drawPlayer(players[i]);
+        }
+
+        if (timeSinceMatchStart < countdownTime) {
+            store<u8>(w4.DRAW_COLORS, 0x43);
+            outlinedText(Math.ceil((countdownTime - timeSinceMatchStart) as f32 / 60).toString().at(0), 75, 10);
+        } else if (timeSinceMatchStart < countdownTime + fightFlashTime) {
+            store<u8>(w4.DRAW_COLORS, (timeSinceMatchStart % 10) < 5 ? 0x34 : 0x43);
+            outlinedText("Fight!", 60, 10);
         }
     } else {
         timeSinceMatchStart = 0;
