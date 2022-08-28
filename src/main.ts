@@ -82,13 +82,29 @@ function initMatch(): void {
     }
 }
 
-function onGround(player: Player): bool {
-    return player.y >= groundLevel;
+function checkCollision(player: Player): i32 {
+    if (player.y >= groundLevel) {
+        return groundLevel;
+    }
+    for (let i = 0; i < arches.length; i++) {
+        const arch = arches[i];
+        if (player.x + 3 > arch.x && player.x - 3 < arch.x + arch.w) {
+            if (player.y >= arch.y - 2 && player.y < arch.y + 2) {
+                return arch.y;
+            }
+        }
+    }
+    return 0;
 }
 
 function updatePlayer(player: Player): void {
     const gamepad = load<u8>(player.gamepadPtr);
-    const grounded = onGround(player);
+    const collisionY = checkCollision(player);
+    const grounded = collisionY != 0;
+    // player.y++;
+    // const grounded = checkCollision(player) != 0;
+    // player.y--;
+
     const dead = player.health <= 0;
     const stunned = player.stunTimer > 0;
     const lunging = player.lungeTimer > 0;
@@ -176,8 +192,8 @@ function updatePlayer(player: Player): void {
     // Ballistic motion
     player.x += player.vx as i32;
     player.y += player.vy as i32;
-    if (player.y > groundLevel) {
-        player.y = groundLevel;
+    if (grounded && player.y > collisionY) {
+        player.y = collisionY;
     }
 
     // Time
@@ -185,6 +201,8 @@ function updatePlayer(player: Player): void {
     player.lungeTimer--;
     player.stunTimer--;
     player.prevGamepadState = gamepad;
+    // outlinedText(`vy: ${player.vy}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
+    // outlinedText(`grounded: ${grounded}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
 }
 
 function drawPlayer(player: Player): void {
