@@ -321,6 +321,10 @@ function drawArch(x: i32, y: i32, w: i32, h: i32): void {
     w4.oval(archX, archY - archW / 2, archW, archW);
     store<u16>(w4.DRAW_COLORS, 0x11);
     w4.rect(archX + 1, archY, archW - 2, archH);
+
+    // make top clearer as a platform
+    store<u16>(w4.DRAW_COLORS, 0x2);
+    w4.rect(x + 1, y - 1, w - 2, 1);
 }
 
 function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
