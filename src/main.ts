@@ -252,10 +252,12 @@ function drawGround(): void {
 }
 
 function drawArch(x: i32, y: i32, w: i32, h: i32): void {
-    const archW = w * 2 / 4;
+    // w += Math.sin(timeSinceMatchStart as f64 / 100) * 15 as i32;
+    const archW = w / 2 as i32;
     const archH = h * 2 / 3; // not including curved part
     const archX = x + (w - archW) / 2;
     const archY = y + h - archH;
+    const wallW = (w - archW) / 2 + 1; // width of either wall (left or right)
 
     store<u16>(w4.DRAW_COLORS, 0x21);
     drawBricks(x, y, w, h - archH);
@@ -268,15 +270,13 @@ function drawArch(x: i32, y: i32, w: i32, h: i32): void {
     const nRadialBricks = 7;
     for (let i = 0; i < nRadialBricks; i++) {
         const angle: f64 = (i as f64) / nRadialBricks * -Math.PI;
-        let x2: i32 = centerX + Math.cos(angle) * (brickR - 0.5) as i32;
-        let y2: i32 = centerY + Math.sin(angle) * (brickR - 0.5) as i32;
-        // x2 = Math.max(Math.min(x2, x + w - 1), x) as i32;
-        // y2 = Math.max(Math.min(y2, y + h - 1), y) as i32;
+        const x2: i32 = centerX + Math.cos(angle) * (brickR - 0.5) as i32;
+        const y2: i32 = centerY + Math.sin(angle) * (brickR - 0.5) as i32;
         w4.line(centerX, centerY, x2, y2);
     }
     store<u16>(w4.DRAW_COLORS, 0x21);
-    drawBricks(x, archY, w - (archW * 3 / 2), archH);
-    drawBricks(x + (archW * 3 / 2), archY, w - (archW * 3 / 2), archH);
+    drawBricks(x, archY, wallW, archH);
+    drawBricks(x + w - wallW, archY, wallW, archH);
 
     store<u16>(w4.DRAW_COLORS, 0x21);
     w4.oval(archX, archY - archW / 2, archW, archW);
