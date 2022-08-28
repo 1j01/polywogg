@@ -7,6 +7,11 @@ inspired by [Eggnogg+](https://madgarden.itch.io/eggnogg) which is an incredibly
 
 [Play the game here](https://1j01.github.io/polywogg/)
 
+### Local Multiplayer
+
+- Player 1: Arrows + <kbd>.</kbd> + <kbd>,</kbd> or gamepad 1
+- Player 2: ESDF + <kbd>A</kbd> + <kbd>Tab</kbd> or gamepad 2
+
 ### Online Multiplayer
 
 Press Enter in the game and select COPY NETPLAY URL, then send the copied URL to a friend!
