@@ -6,7 +6,7 @@ import { playerLowSprite } from "../build/png2src-generated/playerLow";
 
 const skipReadyWaiting = true; // for development, start game immediately
 
-const groundLevel = 121;
+const groundLevel = 154;
 
 class Player {
     public stance: Stance;
@@ -291,7 +291,7 @@ function drawGround(): void {
 }
 
 function drawArch(x: i32, y: i32, w: i32, h: i32): void {
-    // w += Math.sin(timeSinceMatchStart as f64 / 100) * 15 as i32;
+    // w += Math.sin(timeSinceMatchStart as f64 / 100) * 150 as i32; w = Math.max(w, 1) as i32;
     const archW = w / 2 as i32;
     const archH = h - archW; // not including curved part
     const archX = x + (w - archW) / 2;
@@ -306,7 +306,7 @@ function drawArch(x: i32, y: i32, w: i32, h: i32): void {
     const brickR: i32 = archW * 0.7 as i32;
     w4.oval(centerX - brickR, centerY - brickR, brickR * 2, brickR * 2);
     store<u16>(w4.DRAW_COLORS, 0x2);
-    const nRadialBricks = 7;
+    const nRadialBricks = Math.round((archW - 20) / 6) * 2 + 7; // odd number for a centered keystone
     for (let i = 0; i < nRadialBricks; i++) {
         const angle: f64 = (i as f64) / nRadialBricks * -Math.PI;
         const x2: i32 = centerX + Math.cos(angle) * (brickR - 0.5) as i32;
