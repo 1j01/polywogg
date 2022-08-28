@@ -3,7 +3,13 @@
 A 2 player sword fighting game for the [WASM-4](https://wasm4.org) fantasy console,
 inspired by [Eggnogg+](https://madgarden.itch.io/eggnogg) which is an incredibly fun game inspired by [Nidhogg](http://nidhogggame.com/).
 
-To play the game so far you'll need to build it yourself.
+## Play
+
+[Play the game here](https://1j01.github.io/polywogg/)
+
+### Online Multiplayer
+
+Press Enter in the game and select COPY NETPLAY URL, then send the copied URL to a friend!
 
 ## Building
 
@@ -29,9 +35,6 @@ This will open a page in your browser and automatically reload when you make cha
 
 \*It won't reload when changing images, yet.
 
-## Online Multiplayer
-
-Press Enter in the game and select COPY NETPLAY URL, then send the copied URL to a friend!
 
 ## License
 
