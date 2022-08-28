@@ -11,6 +11,7 @@ const groundLevel = 121;
 class Player {
     public stance: Stance;
     public health: i32 = 100;
+    public jumpTimer: i32;
     public lungeTimer: i32;
     public stunTimer: i32;
     public prevGamepadState: u8 = 0xff; // bits set to prevent jumping when starting game
@@ -122,10 +123,18 @@ function updatePlayer(player: Player): void {
         // Jumping
         if (grounded) {
             if (justPressedButton1 && !stunned) {
-                player.vy = -3;
+                player.vy = -2;
+                player.jumpTimer = 10;
             }
         } else {
-            player.vy += 0.2;
+            if (player.jumpTimer > 0 && gamepad & w4.BUTTON_1) {
+                // player.vy -= 0.2;
+            } else {
+                // Gravity
+                player.vy += 0.2;
+                // Limit fall speed
+                player.vy = Math.min(player.vy, 2) as f32;
+            }
         }
 
         // Starting attacking
@@ -172,6 +181,7 @@ function updatePlayer(player: Player): void {
     }
 
     // Time
+    player.jumpTimer--;
     player.lungeTimer--;
     player.stunTimer--;
     player.prevGamepadState = gamepad;
