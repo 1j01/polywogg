@@ -296,6 +296,7 @@ function drawArch(x: i32, y: i32, w: i32, h: i32): void {
 }
 
 function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
+    const oldColors = load<u16>(w4.DRAW_COLORS);
     // w4.rect(x, y, w, h);
     for (let loopY = y; loopY < y + h; loopY += 4) {
         for (let loopX = x - (loopY % 8) * 3; loopX < x + w; loopX += 9) {
@@ -311,6 +312,23 @@ function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
             }
         }
     }
+    // vines
+    for (let i = 0; i < 5; i++) {
+        let vineX = x + (Math.sin(x * y * w + h * i) * w + w / 2) as i32;
+        let vineY = y + h;
+        for (let j = 0; j < 15; j++) {
+            const newX = vineX + Math.round(Math.sin(x * y * w + h * i + j * x * y) * 2) as i32;
+            const newY = vineY - 1;
+            store<u16>(w4.DRAW_COLORS, 0x2);
+            w4.line(vineX, vineY, newX, newY + 1);
+            store<u16>(w4.DRAW_COLORS, 0x1);
+            w4.line(vineX, vineY, newX, newY);
+            vineX = newX;
+            vineY = newY;
+        }
+    }
+
+    store<u16>(w4.DRAW_COLORS, oldColors);
 }
 
 // function drawChains(x: i32, y: i32, w: i32, h: i32): void {
