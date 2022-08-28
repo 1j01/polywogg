@@ -263,7 +263,7 @@ function drawGround(): void {
 function drawArch(x: i32, y: i32, w: i32, h: i32): void {
     // w += Math.sin(timeSinceMatchStart as f64 / 100) * 15 as i32;
     const archW = w / 2 as i32;
-    const archH = h * 2 / 3; // not including curved part
+    const archH = h - archW; // not including curved part
     const archX = x + (w - archW) / 2;
     const archY = y + h - archH;
     const wallW = (w - archW) / 2 + 1; // width of either wall (left or right)
