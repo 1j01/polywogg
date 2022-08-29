@@ -27,6 +27,20 @@ class Player {
         public facing: Facing,
     ) {
     }
+    static clone(p: Player, _i: i32 = 0, _a: Player[] = []): Player {
+        const pCopy = new Player(p.gamepadPtr, p.drawColors, p.x, p.y, p.facing);
+        pCopy.stance = p.stance;
+        pCopy.health = p.health;
+        pCopy.dead = p.dead;
+        pCopy.jumpTimer = p.jumpTimer;
+        pCopy.lungeTimer = p.lungeTimer;
+        pCopy.stunTimer = p.stunTimer;
+        pCopy.prevGamepadState = p.prevGamepadState;
+        pCopy.vx = p.vx;
+        pCopy.vy = p.vy;
+        pCopy.ready = p.ready;
+        return pCopy;
+    }
 }
 
 class Arch {
@@ -445,14 +459,74 @@ export function update(): void {
             const a = arches[i];
             drawArch(a.x, a.y, a.w, a.h);
         }
+        const oldPlayers: Player[] = players.map<Player>(Player.clone);
+        const newPlayers: Player[] = players.map<Player>(Player.clone);
         for (let i = 0; i < players.length; i++) {
             if (timeSinceMatchStart >= countdownTime) {
+                for (let j = 0; j < players.length; j++) {
+                    players[j] = Player.clone(oldPlayers[j]);
+                }
                 updatePlayer(players[i]);
+                for (let j = 0; j < players.length; j++) {
+                    if (players[j].gamepadPtr !== oldPlayers[j].gamepadPtr) {
+                        newPlayers[j].gamepadPtr = players[j].gamepadPtr;
+                    }
+                    if (players[j].drawColors !== oldPlayers[j].drawColors) {
+                        newPlayers[j].drawColors = players[j].drawColors;
+                    }
+                    if (players[j].x !== oldPlayers[j].x) {
+                        newPlayers[j].x = players[j].x;
+                    }
+                    if (players[j].y !== oldPlayers[j].y) {
+                        newPlayers[j].y = players[j].y;
+                    }
+                    if (players[j].facing !== oldPlayers[j].facing) {
+                        newPlayers[j].facing = players[j].facing;
+                    }
+                    if (players[j].stance !== oldPlayers[j].stance) {
+                        newPlayers[j].stance = players[j].stance;
+                    }
+                    if (players[j].health !== oldPlayers[j].health) {
+                        newPlayers[j].health = players[j].health;
+                    }
+                    if (players[j].dead !== oldPlayers[j].dead) {
+                        newPlayers[j].dead = players[j].dead;
+                    }
+                    if (players[j].jumpTimer !== oldPlayers[j].jumpTimer) {
+                        newPlayers[j].jumpTimer = players[j].jumpTimer;
+                    }
+                    if (players[j].lungeTimer !== oldPlayers[j].lungeTimer) {
+                        newPlayers[j].lungeTimer = players[j].lungeTimer;
+                    }
+                    if (players[j].stunTimer !== oldPlayers[j].stunTimer) {
+                        newPlayers[j].stunTimer = players[j].stunTimer;
+                    }
+                    if (players[j].prevGamepadState !== oldPlayers[j].prevGamepadState) {
+                        newPlayers[j].prevGamepadState = players[j].prevGamepadState;
+                    }
+                    if (players[j].vx !== oldPlayers[j].vx) {
+                        newPlayers[j].vx = players[j].vx;
+                    }
+                    if (players[j].vy !== oldPlayers[j].vy) {
+                        newPlayers[j].vy = players[j].vy;
+                    }
+                    if (players[j].ready !== oldPlayers[j].ready) {
+                        newPlayers[j].ready = players[j].ready;
+                    }
+                }
             }
-            drawPlayer(players[i]);
         }
+        players = newPlayers;
+
         for (let i = 0; i < players.length; i++) {
+            // could remove dead in favor of health
+            // now that I'm making ALL properties update only after all players have updated, effectively
+            // right?
             players[i].dead = players[i].health <= 0;
+        }
+
+        for (let i = 0; i < players.length; i++) {
+            drawPlayer(players[i]);
         }
         for (let i = 0; i < particles.length; i++) {
             updateParticle(particles[i]);
