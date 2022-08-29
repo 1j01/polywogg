@@ -25,3 +25,5 @@ m.players[1].x = 80;
 console.log(m.players);
 m.update();
 console.log(m.players);
+require("assert")(m.players[0].stunTimer > 0, "player 1 should be stunned");
+require("assert")(m.players[1].stunTimer > 0, "player 2 should be stunned");
