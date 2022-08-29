@@ -445,14 +445,60 @@ export function update(): void {
             const a = arches[i];
             drawArch(a.x, a.y, a.w, a.h);
         }
+        const oldPlayers = players.map((p) => {
+            const oldPlayer = new Player(p.gamepadPtr, p.drawColors, p.x, p.y, p.facing);
+            oldPlayer.stance = p.stance;
+            oldPlayer.health = p.health;
+            oldPlayer.dead = p.dead;
+            oldPlayer.jumpTimer = p.jumpTimer;
+            oldPlayer.lungeTimer = p.lungeTimer;
+            oldPlayer.stunTimer = p.stunTimer;
+            oldPlayer.prevGamepadState = p.prevGamepadState;
+            oldPlayer.vx = p.vx;
+            oldPlayer.vy = p.vy;
+            oldPlayer.ready = p.ready;
+            return oldPlayer;
+        });
+        const newPlayers = [];
         for (let i = 0; i < players.length; i++) {
             if (timeSinceMatchStart >= countdownTime) {
                 updatePlayer(players[i]);
+                newPlayers[i] = players[i];
+                // players[i] = oldPlayers[i];
+                const p = players[i];
+                const oldPlayer = oldPlayers[i];
+                p.stance = oldPlayer.stance;
+                p.health = oldPlayer.health;
+                p.dead = oldPlayer.dead;
+                p.jumpTimer = oldPlayer.jumpTimer;
+                p.lungeTimer = oldPlayer.lungeTimer;
+                p.stunTimer = oldPlayer.stunTimer;
+                p.prevGamepadState = oldPlayer.prevGamepadState;
+                p.vx = oldPlayer.vx;
+                p.vy = oldPlayer.vy;
+                p.ready = oldPlayer.ready;
             }
-            drawPlayer(players[i]);
         }
         for (let i = 0; i < players.length; i++) {
+            const p = players[i];
+            const newPlayer = newPlayers[i];
+            p.stance = newPlayer.stance;
+            p.health = newPlayer.health;
+            p.dead = newPlayer.dead;
+            p.jumpTimer = newPlayer.jumpTimer;
+            p.lungeTimer = newPlayer.lungeTimer;
+            p.stunTimer = newPlayer.stunTimer;
+            p.prevGamepadState = newPlayer.prevGamepadState;
+            p.vx = newPlayer.vx;
+            p.vy = newPlayer.vy;
+            p.ready = newPlayer.ready;
+
+            // could remove dead in favor of health
+            // now that I'm making ALL properties update only after all players have updated, effectively
             players[i].dead = players[i].health <= 0;
+        }
+        for (let i = 0; i < players.length; i++) {
+            drawPlayer(players[i]);
         }
         for (let i = 0; i < particles.length; i++) {
             updateParticle(particles[i]);
