@@ -181,31 +181,29 @@ function updatePlayer(player: Player): void {
             const blocked =
                 otherPlayer.stance == player.stance &&
                 otherPlayer.facing !== player.facing;
-            if (lunging) {
-                if (
-                    Math.abs(otherPlayer.x - player.x + player.facing as i32 * 5) < 9 &&
-                    Math.abs(otherPlayer.y - player.y) < 9 &&
-                    otherPlayer.stunTimer <= 0 && // TODO: separate invincibility timer, or prevent double hits by tracking whether the lunge has hit a player
-                    !otherPlayer.dead
-                ) {
-                    otherPlayer.vx += player.facing as f64 * 3;
-                    otherPlayer.stunTimer = 10;
-                    if (blocked) {
-                        player.vx *= 0.3;
-                    } else {
-                        // Don't set otherPlayer.dead = true;
-                        // That will happen at the end of the frame,
-                        // so it's symmetrical: both players can kill each other in the same frame.
-                        otherPlayer.health = 0;
-                        // Blood effect
-                        for (let i = 0; i < 20; i++) {
-                            const particle = new Particle(otherPlayer.x, otherPlayer.y, 2, otherPlayer.drawColors >> 4);
-                            particle.vx = Math.random() * 5 - 3;
-                            particle.vy = Math.random() * 5 - 3;
-                            particles.push(particle);
-                            if (particles.length > 50) {
-                                particles.shift();
-                            }
+            if (
+                Math.abs(otherPlayer.x - player.x + player.facing as i32 * 5) < 9 &&
+                Math.abs(otherPlayer.y - player.y) < 9 &&
+                otherPlayer.stunTimer <= 0 && // TODO: separate invincibility timer, or prevent double hits by tracking whether the lunge has hit a player
+                !otherPlayer.dead
+            ) {
+                otherPlayer.vx += player.facing as f64 * 3;
+                otherPlayer.stunTimer = 10;
+                if (blocked) {
+                    player.vx *= 0.3;
+                } else {
+                    // Don't set otherPlayer.dead = true;
+                    // That will happen at the end of the frame,
+                    // so it's symmetrical: both players can kill each other in the same frame.
+                    otherPlayer.health = 0;
+                    // Blood effect
+                    for (let i = 0; i < 20; i++) {
+                        const particle = new Particle(otherPlayer.x, otherPlayer.y, 2, otherPlayer.drawColors >> 4);
+                        particle.vx = Math.random() * 5 - 3;
+                        particle.vy = Math.random() * 5 - 3;
+                        particles.push(particle);
+                        if (particles.length > 50) {
+                            particles.shift();
                         }
                     }
                 }
