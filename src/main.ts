@@ -41,8 +41,8 @@ class Particle {
     public vx: f64;
     public vy: f64;
     constructor(
-        public x: i32,
-        public y: i32,
+        public x: f64,
+        public y: f64,
         public r: i32,
         public drawColors: usize,
     ) { }
@@ -199,6 +199,7 @@ function updatePlayer(player: Player): void {
                             const particle = new Particle(otherPlayer.x, otherPlayer.y, 2, otherPlayer.drawColors >> 4);
                             particle.vx = Math.random() * 5 - 3;
                             particle.vy = Math.random() * 5 - 3;
+                            // w4.trace(particle.vx.toString());
                             particles.unshift(particle);
                             particles.length = Math.min(particles.length, 50) as i32;
                         }
@@ -222,14 +223,17 @@ function updatePlayer(player: Player): void {
     player.lungeTimer--;
     player.stunTimer--;
     player.prevGamepadState = gamepad;
+
+    // Debug
+    // store<u16>(w4.DRAW_COLORS, player.drawColors);
     // outlinedText(`vy: ${player.vy}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
     // outlinedText(`grounded: ${grounded}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
 }
 
 function updateParticle(particle: Particle): void {
-    const collisionY = checkCollision(particle.x, particle.y, particle.r * 2);
-    particle.x += particle.vx as i32;
-    particle.y += particle.vy as i32;
+    const collisionY = checkCollision(particle.x as i32, particle.y as i32, particle.r * 2 as i32);
+    particle.x += particle.vx;
+    particle.y += particle.vy;
     particle.vy += 0.2;
     if (collisionY != 0 && particle.y > collisionY) {
         particle.y = collisionY;
@@ -269,7 +273,7 @@ function drawPlayer(player: Player): void {
 
 function drawParticle(particle: Particle): void {
     store<u16>(w4.DRAW_COLORS, particle.drawColors);
-    w4.line(particle.x, particle.y, particle.x, particle.y);
+    w4.line(particle.x as i32, particle.y as i32, particle.x as i32, particle.y as i32);
 }
 
 export function start(): void {
