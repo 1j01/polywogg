@@ -37,6 +37,17 @@ class Arch {
     ) { }
 }
 
+class Particle {
+    public vx: f32;
+    public vy: f32;
+    constructor(
+        public x: i32,
+        public y: i32,
+        public r: i32,
+        public drawColors: usize,
+    ) { }
+}
+
 enum Facing {
     Left = -1,
     Right = 1,
@@ -50,6 +61,7 @@ enum Stance {
 
 let players: Player[];
 let arches: Arch[];
+let particles: Particle[];
 
 let timeSinceMatchStart = 0;
 let timeSinceMatchEnd = 0;
@@ -83,16 +95,17 @@ function initMatch(): void {
         }
         xOff += w / 2;
     }
+    particles = [];
 }
 
-function checkCollision(player: Player): i32 {
-    if (player.y >= groundLevel) {
+function checkCollision(x: i32, y: i32, w: i32): i32 {
+    if (y >= groundLevel) {
         return groundLevel;
     }
     for (let i = 0; i < arches.length; i++) {
         const arch = arches[i];
-        if (player.x + 3 > arch.x && player.x - 3 < arch.x + arch.w) {
-            if (player.y >= arch.y - 2 && player.y < arch.y + 2) {
+        if (x + w / 2 > arch.x && x - w / 2 < arch.x + arch.w) {
+            if (y >= arch.y - 2 && y < arch.y + 2) {
                 return arch.y;
             }
         }
@@ -102,11 +115,8 @@ function checkCollision(player: Player): i32 {
 
 function updatePlayer(player: Player): void {
     const gamepad = load<u8>(player.gamepadPtr);
-    const collisionY = checkCollision(player);
+    const collisionY = checkCollision(player.x, player.y, 6);
     const grounded = collisionY != 0;
-    // player.y++;
-    // const grounded = checkCollision(player) != 0;
-    // player.y--;
 
     const dead = player.health <= 0;
     const stunned = player.stunTimer > 0;
@@ -164,7 +174,7 @@ function updatePlayer(player: Player): void {
             }
         }
 
-        // Handle attacking other players
+        // Attack/kill the other player
         for (let i = 0; i < players.length; i++) {
             if (players[i] === player) continue;
             const otherPlayer = players[i];
@@ -184,6 +194,14 @@ function updatePlayer(player: Player): void {
                         player.vx *= 0.3;
                     } else {
                         otherPlayer.health = 0;
+
+                        for (let i = 0; i < 20; i++) {
+                            const particle = new Particle(otherPlayer.x, otherPlayer.y, 2, otherPlayer.drawColors >> 4);
+                            particle.vx = Math.random() * 5 - 3 as f32;
+                            particle.vy = Math.random() * 5 - 3 as f32;
+                            particles.unshift(particle);
+                            particles.length = Math.min(particles.length, 50) as i32;
+                        }
                     }
                 }
             }
@@ -206,6 +224,17 @@ function updatePlayer(player: Player): void {
     player.prevGamepadState = gamepad;
     // outlinedText(`vy: ${player.vy}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
     // outlinedText(`grounded: ${grounded}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
+}
+
+function updateParticle(particle: Particle): void {
+    const collisionY = checkCollision(particle.x, particle.y, particle.r * 2);
+    particle.x += particle.vx as i32;
+    particle.y += particle.vy as i32;
+    particle.vy += 0.2;
+    if (collisionY != 0 && particle.y > collisionY) {
+        particle.y = collisionY;
+        particle.vx = 0; // perfect friction for blood
+    }
 }
 
 function drawPlayer(player: Player): void {
@@ -237,6 +266,12 @@ function drawPlayer(player: Player): void {
     // debug
     // outlinedText(`lungeTimer: ${player.lungeTimer}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
 }
+
+function drawParticle(particle: Particle): void {
+    store<u16>(w4.DRAW_COLORS, particle.drawColors);
+    w4.line(particle.x, particle.y, particle.x, particle.y);
+}
+
 export function start(): void {
     // palette by Polyphrog - appropriate for a game called "Polywogg"
     // https://lospec.com/palette-list/black-tar
@@ -410,6 +445,10 @@ export function update(): void {
                 updatePlayer(players[i]);
             }
             drawPlayer(players[i]);
+        }
+        for (let i = 0; i < particles.length; i++) {
+            updateParticle(particles[i]);
+            drawParticle(particles[i]);
         }
 
         if (timeSinceMatchStart < countdownTime) {
