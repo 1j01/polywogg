@@ -12,7 +12,7 @@
     "build:debug": "npm run --silent png2src && asc --target debug",
     "start": "w4 watch",
     "native": "w4 run-native build/cart.wasm",
-    "deploy": "npm run --silent build && w4 bundle build/cart.wasm --title \"Polywogg\" --html build/html/index.html && gh-pages -d build/html",
+    "deploy": "python3 src/before-deploy.py && npm run --silent build && w4 bundle build/cart.wasm --title \"Polywogg\" --html build/html/index.html && gh-pages -d build/html",
     "png2src": "python3 src/png2src.py",
     "png2mem": "sudo env \"PATH=$PATH\" onchange 'src/png/**/*.png' -- python3 src/png2mem.py {{file}}"
   },
