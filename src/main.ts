@@ -15,8 +15,8 @@ class Player {
     public lungeTimer: i32;
     public stunTimer: i32;
     public prevGamepadState: u8 = 0xff; // bits set to prevent jumping when starting game
-    public vx: f32;
-    public vy: f32;
+    public vx: f64;
+    public vy: f64;
     public ready: bool = skipReadyWaiting;
     constructor(
         public gamepadPtr: usize,
@@ -38,8 +38,8 @@ class Arch {
 }
 
 class Particle {
-    public vx: f32;
-    public vy: f32;
+    public vx: f64;
+    public vy: f64;
     constructor(
         public x: i32,
         public y: i32,
@@ -162,7 +162,7 @@ function updatePlayer(player: Player): void {
                 // Gravity
                 player.vy += 0.2;
                 // Limit fall speed
-                player.vy = Math.min(player.vy, 2) as f32;
+                player.vy = Math.min(player.vy, 2);
             }
         }
 
@@ -170,7 +170,7 @@ function updatePlayer(player: Player): void {
         if (justPressedButton2) {
             if (!lunging && !stunned) {
                 player.lungeTimer = 15;
-                player.vx = player.facing as f32 * 5;
+                player.vx = player.facing as f64 * 5;
             }
         }
 
@@ -188,7 +188,7 @@ function updatePlayer(player: Player): void {
                     otherPlayer.stunTimer <= 0 && // TODO: separate invincibility timer, or prevent double hits by tracking whether the lunge has hit a player
                     otherPlayer.health > 0
                 ) {
-                    otherPlayer.vx += player.facing as f32 * 3;
+                    otherPlayer.vx += player.facing as f64 * 3;
                     otherPlayer.stunTimer = 10;
                     if (blocked) {
                         player.vx *= 0.3;
@@ -197,8 +197,8 @@ function updatePlayer(player: Player): void {
 
                         for (let i = 0; i < 20; i++) {
                             const particle = new Particle(otherPlayer.x, otherPlayer.y, 2, otherPlayer.drawColors >> 4);
-                            particle.vx = Math.random() * 5 - 3 as f32;
-                            particle.vy = Math.random() * 5 - 3 as f32;
+                            particle.vx = Math.random() * 5 - 3;
+                            particle.vy = Math.random() * 5 - 3;
                             particles.unshift(particle);
                             particles.length = Math.min(particles.length, 50) as i32;
                         }
@@ -453,7 +453,7 @@ export function update(): void {
 
         if (timeSinceMatchStart < countdownTime) {
             store<u8>(w4.DRAW_COLORS, 0x43);
-            outlinedText(Math.ceil((countdownTime - timeSinceMatchStart) as f32 / 60).toString().at(0), 75, 10);
+            outlinedText(Math.ceil((countdownTime - timeSinceMatchStart) as f64 / 60).toString().at(0), 75, 10);
         } else if (timeSinceMatchStart < countdownTime + fightFlashTime) {
             store<u8>(w4.DRAW_COLORS, (timeSinceMatchStart % 10) < 5 ? 0x34 : 0x43);
             outlinedText("Fight!", 60, 10);
