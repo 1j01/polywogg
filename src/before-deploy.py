@@ -1,4 +1,13 @@
 import re
+import subprocess
+
+if subprocess.check_output(["git", "status", "--porcelain"], encoding="utf8") != "":
+    print("Working directory is not clean! Aborting deploy.")
+    exit(1)
+if subprocess.check_output(["git", "diff", "origin/main"], encoding="utf8") != "":
+    print("Some commits are not pushed. Aborting deploy.")
+    exit(1)
+
 fpath = "src/main.ts"
 with open(fpath, "r+") as f:
     code = f.read()
