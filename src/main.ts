@@ -9,15 +9,15 @@ const skipReadyWaiting = true; // for development, start game immediately
 const groundLevel = 154;
 
 class Player {
-    public stance: Stance;
+    public stance: Stance = Stance.Mid;
     public health: i32 = 100;
-    public dead: bool; // separate from health so both players can die in one frame (avoiding asymmetry for fairness (seeking symmetry))
-    public jumpTimer: i32;
-    public lungeTimer: i32;
-    public stunTimer: i32;
+    public dead: bool = false; // separate from health so both players can die in one frame (avoiding asymmetry for fairness (seeking symmetry))
+    public jumpTimer: i32 = 0;
+    public lungeTimer: i32 = 0;
+    public stunTimer: i32 = 0;
     public prevGamepadState: u8 = 0xff; // bits set to prevent jumping when starting game
-    public vx: f64;
-    public vy: f64;
+    public vx: f64 = 0;
+    public vy: f64 = 0;
     public ready: bool = skipReadyWaiting;
     constructor(
         public gamepadPtr: usize,
@@ -74,7 +74,7 @@ enum Stance {
     Low = 1,
 }
 
-let players: Player[];
+export let players: Player[];
 let arches: Arch[];
 let particles: Particle[];
 
