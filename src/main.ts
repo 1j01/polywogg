@@ -194,14 +194,15 @@ function updatePlayer(player: Player): void {
                         player.vx *= 0.3;
                     } else {
                         otherPlayer.health = 0;
-
+                        // Blood effect
                         for (let i = 0; i < 20; i++) {
                             const particle = new Particle(otherPlayer.x, otherPlayer.y, 2, otherPlayer.drawColors >> 4);
                             particle.vx = Math.random() * 5 - 3;
                             particle.vy = Math.random() * 5 - 3;
-                            // w4.trace(particle.vx.toString());
-                            particles.unshift(particle);
-                            particles.length = Math.min(particles.length, 50) as i32;
+                            particles.push(particle);
+                            if (particles.length > 50) {
+                                particles.shift();
+                            }
                         }
                     }
                 }
