@@ -463,59 +463,60 @@ export function update(): void {
         const newPlayers: Player[] = players.map<Player>(Player.clone);
         for (let i = 0; i < players.length; i++) {
             if (timeSinceMatchStart >= countdownTime) {
+                // Reset so updatePlayer sees old view of the world,
+                // cloning so that oldPlayers isn't affected.
                 for (let j = 0; j < players.length; j++) {
                     players[j] = Player.clone(oldPlayers[j]);
                 }
+                // Run game logic
                 updatePlayer(players[i]);
+
+                // Merge in changes into newPlayers,
+                // first this player and then other players,
+                // such that changes to other players win,
+                // because knocking the other player back is
+                // more important and exceptional than walking.
+                // There will likely be a scenario where the opposite is desired,
+                // in which case this system will fall apart.
+
+                if (players[i].gamepadPtr !== oldPlayers[i].gamepadPtr) newPlayers[i].gamepadPtr = players[i].gamepadPtr;
+                if (players[i].drawColors !== oldPlayers[i].drawColors) newPlayers[i].drawColors = players[i].drawColors;
+                if (players[i].x !== oldPlayers[i].x) newPlayers[i].x = players[i].x;
+                if (players[i].y !== oldPlayers[i].y) newPlayers[i].y = players[i].y;
+                if (players[i].facing !== oldPlayers[i].facing) newPlayers[i].facing = players[i].facing;
+                if (players[i].stance !== oldPlayers[i].stance) newPlayers[i].stance = players[i].stance;
+                if (players[i].health !== oldPlayers[i].health) newPlayers[i].health = players[i].health;
+                if (players[i].dead !== oldPlayers[i].dead) newPlayers[i].dead = players[i].dead;
+                if (players[i].jumpTimer !== oldPlayers[i].jumpTimer) newPlayers[i].jumpTimer = players[i].jumpTimer;
+                if (players[i].lungeTimer !== oldPlayers[i].lungeTimer) newPlayers[i].lungeTimer = players[i].lungeTimer;
+                if (players[i].stunTimer !== oldPlayers[i].stunTimer) newPlayers[i].stunTimer = players[i].stunTimer;
+                if (players[i].prevGamepadState !== oldPlayers[i].prevGamepadState) newPlayers[i].prevGamepadState = players[i].prevGamepadState;
+                if (players[i].vx !== oldPlayers[i].vx) newPlayers[i].vx = players[i].vx;
+                if (players[i].vy !== oldPlayers[i].vy) newPlayers[i].vy = players[i].vy;
+                if (players[i].ready !== oldPlayers[i].ready) newPlayers[i].ready = players[i].ready;
+
                 for (let j = 0; j < players.length; j++) {
-                    if (players[j].gamepadPtr !== oldPlayers[j].gamepadPtr) {
-                        newPlayers[j].gamepadPtr = players[j].gamepadPtr;
-                    }
-                    if (players[j].drawColors !== oldPlayers[j].drawColors) {
-                        newPlayers[j].drawColors = players[j].drawColors;
-                    }
-                    if (players[j].x !== oldPlayers[j].x) {
-                        newPlayers[j].x = players[j].x;
-                    }
-                    if (players[j].y !== oldPlayers[j].y) {
-                        newPlayers[j].y = players[j].y;
-                    }
-                    if (players[j].facing !== oldPlayers[j].facing) {
-                        newPlayers[j].facing = players[j].facing;
-                    }
-                    if (players[j].stance !== oldPlayers[j].stance) {
-                        newPlayers[j].stance = players[j].stance;
-                    }
-                    if (players[j].health !== oldPlayers[j].health) {
-                        newPlayers[j].health = players[j].health;
-                    }
-                    if (players[j].dead !== oldPlayers[j].dead) {
-                        newPlayers[j].dead = players[j].dead;
-                    }
-                    if (players[j].jumpTimer !== oldPlayers[j].jumpTimer) {
-                        newPlayers[j].jumpTimer = players[j].jumpTimer;
-                    }
-                    if (players[j].lungeTimer !== oldPlayers[j].lungeTimer) {
-                        newPlayers[j].lungeTimer = players[j].lungeTimer;
-                    }
-                    if (players[j].stunTimer !== oldPlayers[j].stunTimer) {
-                        newPlayers[j].stunTimer = players[j].stunTimer;
-                    }
-                    if (players[j].prevGamepadState !== oldPlayers[j].prevGamepadState) {
-                        newPlayers[j].prevGamepadState = players[j].prevGamepadState;
-                    }
-                    if (players[j].vx !== oldPlayers[j].vx) {
-                        newPlayers[j].vx = players[j].vx;
-                    }
-                    if (players[j].vy !== oldPlayers[j].vy) {
-                        newPlayers[j].vy = players[j].vy;
-                    }
-                    if (players[j].ready !== oldPlayers[j].ready) {
-                        newPlayers[j].ready = players[j].ready;
-                    }
+                    if (i === j) continue;
+                    if (players[j].gamepadPtr !== oldPlayers[j].gamepadPtr) newPlayers[j].gamepadPtr = players[j].gamepadPtr;
+                    if (players[j].drawColors !== oldPlayers[j].drawColors) newPlayers[j].drawColors = players[j].drawColors;
+                    if (players[j].x !== oldPlayers[j].x) newPlayers[j].x = players[j].x;
+                    if (players[j].y !== oldPlayers[j].y) newPlayers[j].y = players[j].y;
+                    if (players[j].facing !== oldPlayers[j].facing) newPlayers[j].facing = players[j].facing;
+                    if (players[j].stance !== oldPlayers[j].stance) newPlayers[j].stance = players[j].stance;
+                    if (players[j].health !== oldPlayers[j].health) newPlayers[j].health = players[j].health;
+                    if (players[j].dead !== oldPlayers[j].dead) newPlayers[j].dead = players[j].dead;
+                    if (players[j].jumpTimer !== oldPlayers[j].jumpTimer) newPlayers[j].jumpTimer = players[j].jumpTimer;
+                    if (players[j].lungeTimer !== oldPlayers[j].lungeTimer) newPlayers[j].lungeTimer = players[j].lungeTimer;
+                    if (players[j].stunTimer !== oldPlayers[j].stunTimer) newPlayers[j].stunTimer = players[j].stunTimer;
+                    if (players[j].prevGamepadState !== oldPlayers[j].prevGamepadState) newPlayers[j].prevGamepadState = players[j].prevGamepadState;
+                    if (players[j].vx !== oldPlayers[j].vx) newPlayers[j].vx = players[j].vx;
+                    if (players[j].vy !== oldPlayers[j].vy) newPlayers[j].vy = players[j].vy;
+                    if (players[j].ready !== oldPlayers[j].ready) newPlayers[j].ready = players[j].ready;
                 }
             }
         }
+        // Update game state to version containing all changes
+        // No copying needed because newPlayers will never be used again.
         players = newPlayers;
 
         for (let i = 0; i < players.length; i++) {
