@@ -11,6 +11,7 @@ const groundLevel = 154;
 class Player {
     public stance: Stance;
     public health: i32 = 100;
+    public dead: bool; // separate from health so both players can die in one frame (avoiding asymmetry for fairness (seeking symmetry))
     public jumpTimer: i32;
     public lungeTimer: i32;
     public stunTimer: i32;
@@ -118,13 +119,12 @@ function updatePlayer(player: Player): void {
     const collisionY = checkCollision(player.x, player.y, 6);
     const grounded = collisionY != 0;
 
-    const dead = player.health <= 0;
     const stunned = player.stunTimer > 0;
     const lunging = player.lungeTimer > 0;
     const justPressedButton1 = gamepad & w4.BUTTON_1 && !(player.prevGamepadState & w4.BUTTON_1);
     const justPressedButton2 = gamepad & w4.BUTTON_2 && !(player.prevGamepadState & w4.BUTTON_2);
 
-    if (!dead) {
+    if (!player.dead) {
         // Movement
         if (!lunging && !stunned) {
             player.vx = 0;
@@ -186,13 +186,16 @@ function updatePlayer(player: Player): void {
                     Math.abs(otherPlayer.x - player.x + player.facing as i32 * 5) < 9 &&
                     Math.abs(otherPlayer.y - player.y) < 9 &&
                     otherPlayer.stunTimer <= 0 && // TODO: separate invincibility timer, or prevent double hits by tracking whether the lunge has hit a player
-                    otherPlayer.health > 0
+                    !otherPlayer.dead
                 ) {
                     otherPlayer.vx += player.facing as f64 * 3;
                     otherPlayer.stunTimer = 10;
                     if (blocked) {
                         player.vx *= 0.3;
                     } else {
+                        // Don't set otherPlayer.dead = true;
+                        // That will happen at the end of the frame,
+                        // so it's symmetrical: both players can kill each other in the same frame.
                         otherPlayer.health = 0;
                         // Blood effect
                         for (let i = 0; i < 20; i++) {
@@ -244,12 +247,11 @@ function updateParticle(particle: Particle): void {
 
 function drawPlayer(player: Player): void {
     store<u16>(w4.DRAW_COLORS, player.drawColors);
-    const dead = player.health <= 0;
     const sprite = player.stance == Stance.Low ? playerLowSprite : playerMidSprite;
     const x = player.x - (sprite.width / 2);
     let y = player.y - sprite.height;
     let flags = sprite.flags;
-    if (dead) {
+    if (player.dead) {
         flags |= w4.BLIT_ROTATE;
         if (player.facing == Facing.Left) {
             flags |= w4.BLIT_FLIP_Y;
@@ -450,6 +452,9 @@ export function update(): void {
                 updatePlayer(players[i]);
             }
             drawPlayer(players[i]);
+        }
+        for (let i = 0; i < players.length; i++) {
+            players[i].dead = players[i].health <= 0;
         }
         for (let i = 0; i < particles.length; i++) {
             updateParticle(particles[i]);
