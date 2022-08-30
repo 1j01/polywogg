@@ -196,7 +196,7 @@ function updatePlayer(player: Player): void {
                 otherPlayer.stance == player.stance &&
                 otherPlayer.facing !== player.facing;
             if (
-                Math.abs(otherPlayer.x - player.x + player.facing as i32 * 5) < 9 &&
+                Math.abs(otherPlayer.x - (player.x + (player.facing as i32 * 5))) < 3 &&
                 Math.abs(otherPlayer.y - player.y) < 9 &&
                 otherPlayer.stunTimer <= 0 && // TODO: separate invincibility timer, or prevent double hits by tracking whether the lunge has hit a player
                 !otherPlayer.dead
