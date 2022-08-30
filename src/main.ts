@@ -195,9 +195,12 @@ function updatePlayer(player: Player): void {
             const blocked =
                 otherPlayer.stance == player.stance &&
                 otherPlayer.facing !== player.facing;
+            const swordReach = player.stance == Stance.Mid ? 6 : 4;
+            const swordX = player.x + (player.facing as i32 * swordReach);
+            const swordY = player.y - 4 + (player.stance as i32 * 5);
             if (
-                Math.abs(otherPlayer.x - (player.x + (player.facing as i32 * 5))) < 3 &&
-                Math.abs(otherPlayer.y - player.y) < 9 &&
+                Math.abs(otherPlayer.x - swordX) < 2 &&
+                Math.abs(otherPlayer.y - 4 - swordY) < 7 &&
                 otherPlayer.stunTimer <= 0 && // TODO: separate invincibility timer, or prevent double hits by tracking whether the lunge has hit a player
                 !otherPlayer.dead
             ) {
