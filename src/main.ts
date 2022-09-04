@@ -76,7 +76,8 @@ enum Stance {
 
 export let players: Player[];
 let arches: Arch[];
-let particles: Particle[];
+let bloodParticles: Particle[];
+let fireParticles: Particle[];
 
 let timeSinceMatchStart = 0;
 let timeSinceMatchEnd = 0;
@@ -110,7 +111,8 @@ function initMatch(): void {
         }
         xOff += w / 2;
     }
-    particles = [];
+    bloodParticles = [];
+    fireParticles = [];
 }
 
 function checkCollision(x: i32, y: i32, w: i32): i32 {
@@ -218,9 +220,9 @@ function updatePlayer(player: Player): void {
                         const particle = new Particle(otherPlayer.x, otherPlayer.y, 2, otherPlayer.drawColors >> 4);
                         particle.vx = Math.random() * 5 - 3;
                         particle.vy = Math.random() * 5 - 3;
-                        particles.push(particle);
-                        if (particles.length > 50) {
-                            particles.shift();
+                        bloodParticles.push(particle);
+                        if (bloodParticles.length > 50) {
+                            bloodParticles.shift();
                         }
                     }
                 }
@@ -390,6 +392,19 @@ function drawArch(x: i32, y: i32, w: i32, h: i32): void {
         // w4.line(x, y, x, y + (1 + Math.tan(i * 2)) * 2 as i32);
         w4.line(lineX, y, lineX, y + (1 + Math.sin(i * 200)) * 2 as i32);
     }
+
+    // sconces
+    store<u16>(w4.DRAW_COLORS, 0x42);
+    for (let i = 0; i <= 1; i++) {
+        const sconceX = i ? x + wallW / 2 : x + w - wallW / 2;
+        const sconceY = y + h - 15;// - Math.max(archH / 2, 10);
+        w4.oval(sconceX - 2, sconceY - 2, 4, 4);
+        // fire effect
+        fireParticles.push(new Particle(sconceX, sconceY, 2, 0x4));
+        if (fireParticles.length > 80) {
+            fireParticles.shift();
+        }
+    }
 }
 
 function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
@@ -552,9 +567,15 @@ export function update(): void {
         for (let i = 0; i < players.length; i++) {
             drawPlayer(players[i]);
         }
-        for (let i = 0; i < particles.length; i++) {
-            updateParticle(particles[i]);
-            drawParticle(particles[i]);
+        for (let i = 0; i < bloodParticles.length; i++) {
+            updateParticle(bloodParticles[i]);
+            drawParticle(bloodParticles[i]);
+        }
+        for (let i = 0; i < fireParticles.length; i++) {
+            fireParticles[i].vy = Math.random() < 0.9 ? -1 : -2;
+            fireParticles[i].vx = Math.random() < 0.9 ? 0 : Math.random() < 0.5 ? -1 : 1;
+            updateParticle(fireParticles[i]);
+            drawParticle(fireParticles[i]);
         }
 
         if (timeSinceMatchStart < countdownTime) {
