@@ -24,8 +24,8 @@ function sim(steps = 100) {
 	}
 }
 
-describe('Polywogg', () => {
-	describe('P1 to right, P2 to left, going towards each other', () => {
+describe('Tilting', () => {
+	describe('P1 on the right, P2 on the left, going towards each other', () => {
 		beforeEach(() => {
 			m.initMatch();
 			m.players[0].x = 80 + 10;
@@ -93,6 +93,54 @@ describe('Polywogg', () => {
 			sim();
 			assert(m.players[0].health <= 0, "P1 should have died");
 			assert(m.players[1].health <= 0, "P2 should have died");
+		});
+	});
+});
+
+describe('Walking away from a clash', () => {
+	describe('P1 on the right, P2 on the left, clashing', () => {
+		beforeEach(() => {
+			m.initMatch();
+			m.players[0].x = 80 + 10;
+			m.players[1].x = 80 - 10;
+			store(w4.GAMEPAD1, w4.BUTTON_LEFT);
+			store(w4.GAMEPAD2, w4.BUTTON_RIGHT);
+			sim();
+		});
+		it('should have both survive if both turn away at the same instant', () => {
+			store(w4.GAMEPAD1, w4.BUTTON_RIGHT);
+			store(w4.GAMEPAD2, w4.BUTTON_LEFT);
+			sim();
+			assert(m.players[0].health > 0, "P1 should have survived");
+			assert(m.players[1].health > 0, "P2 should have survived");
+		});
+		it('should have both survive if P1 stops moving and P2 walks away', () => {
+			store(w4.GAMEPAD1, 0);
+			store(w4.GAMEPAD2, w4.BUTTON_LEFT);
+			sim();
+			assert(m.players[0].health > 0, "P1 should have survived");
+			assert(m.players[1].health > 0, "P2 should have survived");
+		});
+		it('should have both survive if P2 stops moving and P1 walks away', () => {
+			store(w4.GAMEPAD1, w4.BUTTON_RIGHT);
+			store(w4.GAMEPAD2, 0);
+			sim();
+			assert(m.players[0].health > 0, "P1 should have survived");
+			assert(m.players[1].health > 0, "P2 should have survived");
+		});
+		it('should have both survive if P1 continues left and P2 goes left', () => {
+			store(w4.GAMEPAD1, w4.BUTTON_LEFT);
+			store(w4.GAMEPAD2, w4.BUTTON_LEFT);
+			sim();
+			assert(m.players[0].health > 0, "P1 should have survived");
+			assert(m.players[1].health > 0, "P2 should have survived");
+		});
+		it('should have both survive if P2 continues right and P1 goes right', () => {
+			store(w4.GAMEPAD1, w4.BUTTON_RIGHT);
+			store(w4.GAMEPAD2, w4.BUTTON_RIGHT);
+			sim();
+			assert(m.players[0].health > 0, "P1 should have survived");
+			assert(m.players[1].health > 0, "P2 should have survived");
 		});
 	});
 });
