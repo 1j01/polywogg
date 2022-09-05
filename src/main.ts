@@ -20,6 +20,7 @@ class Player {
     public vy: f64 = 0;
     public ready: bool = skipReadyWaiting;
     constructor(
+        public playerIndex: i32,
         public gamepadPtr: usize,
         public drawColors: usize,
         public x: i32,
@@ -28,7 +29,7 @@ class Player {
     ) {
     }
     static clone(p: Player, _i: i32 = 0, _a: Player[] = []): Player {
-        const pCopy = new Player(p.gamepadPtr, p.drawColors, p.x, p.y, p.facing);
+        const pCopy = new Player(p.playerIndex, p.gamepadPtr, p.drawColors, p.x, p.y, p.facing);
         pCopy.stance = p.stance;
         pCopy.health = p.health;
         pCopy.dead = p.dead;
@@ -41,6 +42,16 @@ class Player {
         pCopy.ready = p.ready;
         return pCopy;
     }
+}
+
+class PlayerUpdate {
+    constructor(
+        public playerIndex: i32,
+        public accelerationX: f64 = 0,
+        public accelerationY: f64 = 0,
+        public relativeHealth: i32 = 0,
+        public stunForTime: i32 = -1,
+    ) { }
 }
 
 class Arch {
@@ -90,8 +101,8 @@ function initMatch(): void {
     timeSinceMatchEnd = 0;
     const centerX = 80;
     players = [
-        new Player(w4.GAMEPAD1, 0x34, centerX + 30, groundLevel, Facing.Left),
-        new Player(w4.GAMEPAD2, 0x43, centerX - 30, groundLevel, Facing.Right),
+        new Player(0, w4.GAMEPAD1, 0x34, centerX + 30, groundLevel, Facing.Left),
+        new Player(1, w4.GAMEPAD2, 0x43, centerX - 30, groundLevel, Facing.Right),
     ];
     const w = 161;
     const h = 161;
@@ -130,7 +141,7 @@ function checkCollision(x: i32, y: i32, w: i32): i32 {
     return 0;
 }
 
-function updatePlayer(player: Player): void {
+function updatePlayer(player: Player): PlayerUpdate[] {
     const gamepad = load<u8>(player.gamepadPtr);
     const collisionY = checkCollision(player.x, player.y, 6);
     const grounded = collisionY != 0;
@@ -139,6 +150,8 @@ function updatePlayer(player: Player): void {
     const lunging = player.lungeTimer > 0;
     const justPressedButton1 = gamepad & w4.BUTTON_1 && !(player.prevGamepadState & w4.BUTTON_1);
     const justPressedButton2 = gamepad & w4.BUTTON_2 && !(player.prevGamepadState & w4.BUTTON_2);
+
+    let updates: PlayerUpdate[] = [];
 
     if (!player.dead) {
         // Movement
@@ -206,15 +219,16 @@ function updatePlayer(player: Player): void {
                 otherPlayer.stunTimer <= 0 && // TODO: separate invincibility timer, or prevent double hits by tracking whether the lunge has hit a player
                 !otherPlayer.dead
             ) {
-                otherPlayer.vx += player.facing as f64 * 3;
-                otherPlayer.stunTimer = 10;
+                const update = new PlayerUpdate(i);
+                update.accelerationX = player.facing as f64 * 3;
+                update.stunForTime = 10;
                 if (blocked) {
                     player.vx *= 0.3;
                 } else {
                     // Don't set otherPlayer.dead = true;
                     // That will happen at the end of the frame,
                     // so it's symmetrical: both players can kill each other in the same frame.
-                    otherPlayer.health = 0;
+                    update.relativeHealth = -100;
                     // Blood effect
                     for (let i = 0; i < 20; i++) {
                         const particle = new Particle(otherPlayer.x, otherPlayer.y, 2, otherPlayer.drawColors >> 4);
@@ -226,29 +240,38 @@ function updatePlayer(player: Player): void {
                         }
                     }
                 }
+                updates.push(update);
             }
         }
     } else {
         player.vx *= 0.9;
     }
 
-    // Ballistic motion
-    player.x += player.vx as i32;
-    player.y += player.vy as i32;
-    if (grounded && player.y > collisionY) {
-        player.y = collisionY;
-    }
-
-    // Time
-    player.jumpTimer--;
-    player.lungeTimer--;
-    player.stunTimer--;
     player.prevGamepadState = gamepad;
 
     // Debug
     // store<u16>(w4.DRAW_COLORS, player.drawColors);
     // outlinedText(`vy: ${player.vy}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
     // outlinedText(`grounded: ${grounded}`, player.x - 40, player.y + (player.gamepadPtr - w4.GAMEPAD1) * 10);
+
+    return updates;
+}
+
+function movePlayer(player: Player): void {
+    const collisionY = checkCollision(player.x, player.y, 6);
+    const grounded = collisionY != 0;
+
+    player.x += player.vx as i32;
+    player.y += player.vy as i32;
+    if (grounded && player.y > collisionY) {
+        player.y = collisionY;
+    }
+}
+
+function updatePlayerTimers(player: Player): void {
+    player.jumpTimer--;
+    player.lungeTimer--;
+    player.stunTimer--;
 }
 
 function updateParticle(particle: Particle): void {
@@ -477,86 +500,29 @@ export function update(): void {
             const a = arches[i];
             drawArch(a.x, a.y, a.w, a.h);
         }
-        const oldPlayers: Player[] = players.map<Player>(Player.clone);
-        const newPlayers: Player[] = players.map<Player>(Player.clone);
-        const newOtherPlayers: Player[] = players.map<Player>(Player.clone);
-        for (let i = 0; i < players.length; i++) {
-            if (timeSinceMatchStart >= countdownTime) {
-                // Reset so updatePlayer sees old view of the world,
-                // cloning so that oldPlayers isn't affected.
-                for (let j = 0; j < players.length; j++) {
-                    players[j] = Player.clone(oldPlayers[j]);
-                }
-                // Run game logic
-                updatePlayer(players[i]);
-
-                // Track changes to players
-                if (players[i].gamepadPtr !== oldPlayers[i].gamepadPtr) newPlayers[i].gamepadPtr = players[i].gamepadPtr;
-                if (players[i].drawColors !== oldPlayers[i].drawColors) newPlayers[i].drawColors = players[i].drawColors;
-                if (players[i].x !== oldPlayers[i].x) newPlayers[i].x = players[i].x;
-                if (players[i].y !== oldPlayers[i].y) newPlayers[i].y = players[i].y;
-                if (players[i].facing !== oldPlayers[i].facing) newPlayers[i].facing = players[i].facing;
-                if (players[i].stance !== oldPlayers[i].stance) newPlayers[i].stance = players[i].stance;
-                if (players[i].health !== oldPlayers[i].health) newPlayers[i].health = players[i].health;
-                if (players[i].dead !== oldPlayers[i].dead) newPlayers[i].dead = players[i].dead;
-                if (players[i].jumpTimer !== oldPlayers[i].jumpTimer) newPlayers[i].jumpTimer = players[i].jumpTimer;
-                if (players[i].lungeTimer !== oldPlayers[i].lungeTimer) newPlayers[i].lungeTimer = players[i].lungeTimer;
-                if (players[i].stunTimer !== oldPlayers[i].stunTimer) newPlayers[i].stunTimer = players[i].stunTimer;
-                if (players[i].prevGamepadState !== oldPlayers[i].prevGamepadState) newPlayers[i].prevGamepadState = players[i].prevGamepadState;
-                if (players[i].vx !== oldPlayers[i].vx) newPlayers[i].vx = players[i].vx;
-                if (players[i].vy !== oldPlayers[i].vy) newPlayers[i].vy = players[i].vy;
-                if (players[i].ready !== oldPlayers[i].ready) newPlayers[i].ready = players[i].ready;
-
-                // Track changes to OTHER players during updatePlayer
-                for (let j = 0; j < players.length; j++) {
-                    if (i === j) continue;
-                    if (players[j].gamepadPtr !== oldPlayers[j].gamepadPtr) newOtherPlayers[j].gamepadPtr = players[j].gamepadPtr;
-                    if (players[j].drawColors !== oldPlayers[j].drawColors) newOtherPlayers[j].drawColors = players[j].drawColors;
-                    if (players[j].x !== oldPlayers[j].x) newOtherPlayers[j].x = players[j].x;
-                    if (players[j].y !== oldPlayers[j].y) newOtherPlayers[j].y = players[j].y;
-                    if (players[j].facing !== oldPlayers[j].facing) newOtherPlayers[j].facing = players[j].facing;
-                    if (players[j].stance !== oldPlayers[j].stance) newOtherPlayers[j].stance = players[j].stance;
-                    if (players[j].health !== oldPlayers[j].health) newOtherPlayers[j].health = players[j].health;
-                    if (players[j].dead !== oldPlayers[j].dead) newOtherPlayers[j].dead = players[j].dead;
-                    if (players[j].jumpTimer !== oldPlayers[j].jumpTimer) newOtherPlayers[j].jumpTimer = players[j].jumpTimer;
-                    if (players[j].lungeTimer !== oldPlayers[j].lungeTimer) newOtherPlayers[j].lungeTimer = players[j].lungeTimer;
-                    if (players[j].stunTimer !== oldPlayers[j].stunTimer) newOtherPlayers[j].stunTimer = players[j].stunTimer;
-                    if (players[j].prevGamepadState !== oldPlayers[j].prevGamepadState) newOtherPlayers[j].prevGamepadState = players[j].prevGamepadState;
-                    if (players[j].vx !== oldPlayers[j].vx) newOtherPlayers[j].vx = players[j].vx;
-                    if (players[j].vy !== oldPlayers[j].vy) newOtherPlayers[j].vy = players[j].vy;
-                    if (players[j].ready !== oldPlayers[j].ready) newOtherPlayers[j].ready = players[j].ready;
+        let playerUpdates: PlayerUpdate[] = [];
+        if (timeSinceMatchStart >= countdownTime) {
+            for (let i = 0; i < players.length; i++) {
+                playerUpdates = playerUpdates.concat(updatePlayer(players[i]));
+            }
+            for (let i = 0; i < playerUpdates.length; i++) {
+                const update = playerUpdates[i];
+                // w4.trace(`${update.playerIndex}: ${update.relativeHealth}`);
+                const player = players[update.playerIndex];
+                player.vx += update.accelerationX;
+                player.vy += update.accelerationY;
+                player.health += update.relativeHealth;
+                if (update.stunForTime > 0) {
+                    player.stunTimer = update.stunForTime;
                 }
             }
+            for (let i = 0; i < players.length; i++) {
+                movePlayer(players[i]);
+            }
+            for (let i = 0; i < players.length; i++) {
+                updatePlayerTimers(players[i]);
+            }
         }
-        // Update game state to version containing all changes
-        // No copying needed because newPlayers will never be used again.
-        players = newPlayers;
-        // Merge in changes to OTHER players that happened during updatePlayer.
-        // I'm giving priority to changes to OTHER players
-        // because knocking the other player back is
-        // more important and exceptional than walking.
-        // There will likely be a scenario where the opposite is desired,
-        // in which case this system will fall apart.
-        // It will also break down if updatePlayer modifies anything other than players (and particles).
-        for (let i = 0; i < players.length; i++) {
-            if (newOtherPlayers[i].gamepadPtr !== oldPlayers[i].gamepadPtr) players[i].gamepadPtr = newOtherPlayers[i].gamepadPtr;
-            if (newOtherPlayers[i].drawColors !== oldPlayers[i].drawColors) players[i].drawColors = newOtherPlayers[i].drawColors;
-            if (newOtherPlayers[i].x !== oldPlayers[i].x) players[i].x = newOtherPlayers[i].x;
-            if (newOtherPlayers[i].y !== oldPlayers[i].y) players[i].y = newOtherPlayers[i].y;
-            if (newOtherPlayers[i].facing !== oldPlayers[i].facing) players[i].facing = newOtherPlayers[i].facing;
-            if (newOtherPlayers[i].stance !== oldPlayers[i].stance) players[i].stance = newOtherPlayers[i].stance;
-            if (newOtherPlayers[i].health !== oldPlayers[i].health) players[i].health = newOtherPlayers[i].health;
-            if (newOtherPlayers[i].dead !== oldPlayers[i].dead) players[i].dead = newOtherPlayers[i].dead;
-            if (newOtherPlayers[i].jumpTimer !== oldPlayers[i].jumpTimer) players[i].jumpTimer = newOtherPlayers[i].jumpTimer;
-            if (newOtherPlayers[i].lungeTimer !== oldPlayers[i].lungeTimer) players[i].lungeTimer = newOtherPlayers[i].lungeTimer;
-            if (newOtherPlayers[i].stunTimer !== oldPlayers[i].stunTimer) players[i].stunTimer = newOtherPlayers[i].stunTimer;
-            if (newOtherPlayers[i].prevGamepadState !== oldPlayers[i].prevGamepadState) players[i].prevGamepadState = newOtherPlayers[i].prevGamepadState;
-            if (newOtherPlayers[i].vx !== oldPlayers[i].vx) players[i].vx = newOtherPlayers[i].vx;
-            if (newOtherPlayers[i].vy !== oldPlayers[i].vy) players[i].vy = newOtherPlayers[i].vy;
-            if (newOtherPlayers[i].ready !== oldPlayers[i].ready) players[i].ready = newOtherPlayers[i].ready;
-        }
-
-
         for (let i = 0; i < players.length; i++) {
             // could remove dead in favor of health
             // now that I'm making ALL properties update only after all players have updated, effectively
