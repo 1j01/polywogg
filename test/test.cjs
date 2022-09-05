@@ -1,3 +1,4 @@
+var assert = require('assert');
 const w4 = require("../build/tsc/src/wasm4");
 const stubs = require("../build/tsc/src/wasm4-stubs");
 for (const k in stubs) {
@@ -20,10 +21,19 @@ global.changetype = (x) => x;
 global.sizeof = (x) => 1;
 m = require("../build/tsc/src/main");
 // m.start();
-m.players[0].x = 80;
-m.players[1].x = 80;
-console.log(m.players);
-m.update();
-console.log(m.players);
-require("assert")(m.players[0].stunTimer > 0, "player 1 should be stunned");
-require("assert")(m.players[1].stunTimer > 0, "player 2 should be stunned");
+
+describe('Polywogg', () => {
+	describe('P1 to right, P2 to left, going towards each other', () => {
+		beforeEach(() => {
+			m.players[0].x = 80 + 10;
+			m.players[1].x = 80 - 10;
+			for (let i = 0; i < 50; i++) {
+				m.update("FOR_TEST");
+			}
+		});
+		it('should have both survive', () => {
+			assert(m.players[0].health > 0, "P1 should survive");
+			assert(m.players[1].health > 0, "P2 should survive");
+		});
+	});
+});

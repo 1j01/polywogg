@@ -85,6 +85,7 @@ enum Stance {
     Low = 1,
 }
 
+// exported for npm test
 export let players: Player[];
 let arches: Arch[];
 let bloodParticles: Particle[];
@@ -96,7 +97,8 @@ let timeSinceMatchEnd = 0;
 // outside of start() function because it doesn't seem to work with netplay otherwise
 initMatch();
 
-function initMatch(): void {
+// exported for npm test
+export function initMatch(): void {
     timeSinceMatchStart = 0;
     timeSinceMatchEnd = 0;
     const centerX = 80;
@@ -488,7 +490,7 @@ function drawBricks(x: i32, y: i32, w: i32, h: i32): void {
 //     }
 // }
 
-export function update(): void {
+export function update(forTest = ""): void {
 
     const ready = players.every((player) => player.ready);
 
@@ -502,7 +504,7 @@ export function update(): void {
         const fightFlashTime = 50;
 
         const delayBeforeReset = 50;
-        if (timeSinceMatchEnd > delayBeforeReset) {
+        if (timeSinceMatchEnd > delayBeforeReset && forTest !== "FOR_TEST") {
             initMatch();
         }
 
