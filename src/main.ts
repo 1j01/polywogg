@@ -159,10 +159,16 @@ function updatePlayer(player: Player): PlayerUpdate[] {
             player.vx = 0;
             if (gamepad & w4.BUTTON_LEFT) {
                 player.vx -= 1;
+                if (player.facing != Facing.Left) {
+                    w4.trace(player.playerIndex.toString() + ": turn left");
+                }
                 player.facing = Facing.Left;
             }
             if (gamepad & w4.BUTTON_RIGHT) {
                 player.vx += 1;
+                if (player.facing != Facing.Right) {
+                    w4.trace(player.playerIndex.toString() + ": turn right");
+                }
                 player.facing = Facing.Right;
             }
         } else {
@@ -203,7 +209,7 @@ function updatePlayer(player: Player): PlayerUpdate[] {
             }
         }
 
-        // Attack/kill the other player
+        // Push/shove/knock/attack/kill the other player
         for (let i = 0; i < players.length; i++) {
             if (players[i] === player) continue;
             const otherPlayer = players[i];
@@ -213,6 +219,7 @@ function updatePlayer(player: Player): PlayerUpdate[] {
             const swordReach = player.stance == Stance.Mid ? 6 : 4;
             const swordX = player.x + (player.facing as i32 * swordReach);
             const swordY = player.y - 4 + (player.stance as i32 * 5);
+            w4.trace(i.toString() + ": " + Math.abs(otherPlayer.x - swordX).toString());
             if (
                 Math.abs(otherPlayer.x - swordX) < 2 &&
                 Math.abs(otherPlayer.y - 4 - swordY) < 7 &&
@@ -220,11 +227,15 @@ function updatePlayer(player: Player): PlayerUpdate[] {
                 !otherPlayer.dead
             ) {
                 const update = new PlayerUpdate(i);
-                update.accelerationX = player.facing as f64 * 3;
-                update.stunForTime = 10;
+                update.accelerationX = player.vx;//player.facing as f64 * 3;
+                // update.accelerationX = player.vx + player.facing as f64 * 1;
+                // update.stunForTime = 10;
                 if (blocked) {
-                    player.vx *= 0.3;
+                    w4.trace(i.toString() + " blocked");
+
+                    // player.vx *= 0.3;
                 } else {
+                    w4.trace(i.toString() + " died");
                     // Don't set otherPlayer.dead = true;
                     // That will happen at the end of the frame,
                     // so it's symmetrical: both players can kill each other in the same frame.
